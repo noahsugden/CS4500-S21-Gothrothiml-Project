@@ -30,12 +30,12 @@ public class TownNetwork {
 
   public void placeCharacter(Character c, Town t) {
     if (characterPositions.get(t).equals("")) {
-      characterPositions.replace(t, c.getName());
-      characterPositions.forEach((town, characterName) -> {
-        if (characterName.equals(c.getName())) {
-          characterPositions.replace(town, "");
+      for (Map.Entry<Town,String> entry : characterPositions.entrySet()) {
+        if (entry.getValue().equals(c.getName())) {
+          characterPositions.replace(entry.getKey(), "");
         }
-      });
+      }
+      characterPositions.replace(t, c.getName());
     } else {
       System.out.println("Unable to place character.  Town already contains character.");
     }
@@ -43,18 +43,19 @@ public class TownNetwork {
 
   public boolean canReach(Character c, Town t) {
     boolean hasTown = false;
-    Town startTown;
-    characterPositions.forEach((town, characterName) -> {
-      if (characterName.equals(c.getName())) {
+    Town startTown = new Town();
+
+    for (Map.Entry<Town,String> entry : characterPositions.entrySet()) {
+      if (entry.getValue().equals(c.getName())) {
         hasTown = true;
-        startTown = town;
+        startTown = entry.getKey();
       }
-    });
-    if (hasTown) {
+    }
+      if (hasTown) {
       if (characterPositions.get(t).equals(c.getName())) {
         return true;
       } else {
-        return false;
+        return startTown.canReach(t);
       }
     } else {
       return false;
@@ -62,9 +63,7 @@ public class TownNetwork {
 
   }
 
-  private boolean isReachable(Town t1, Town t2) {
-    ArrayList<Town> visitedSoFar = new ArrayList<>();
 
-  }
+
 
 }
