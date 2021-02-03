@@ -1,36 +1,86 @@
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 import java.net.*;
 import java.io.*;
+import java.nio.Buffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server extends Thread {
-  private ServerSocket serverSocket;
+
+  private ServerSocket server;
+  private DataOutputStream out;
+  BufferedReader in;
+  List<JsonElement> numJsons = new ArrayList<>();
+  JsonReader jsonReader;
+  Socket socket;
 
   public Server() throws IOException {
-    serverSocket = new ServerSocket(8000);
-    serverSocket.setSoTimeout(0);
+    server = new ServerSocket();
+    server.setSoTimeout(0);
   }
 
   public void run() {
     Operation result = new Addition();
-    while(true) {
-      try {
-        Socket server = serverSocket.accept();
-        BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-        System.out.println("You are here");
-        System.out.println(in.toString());
+    try {
+      server = new ServerSocket(8000);
+      System.out.println("Server started...");
+      socket = server.accept();
+      System.out.println("Client has been accepted...");
+      in = new BufferedReader(
+          new InputStreamReader(socket.getInputStream()));
+      out = new DataOutputStream(
+          new BufferedOutputStream(socket.getOutputStream()));
+      jsonReader = new JsonReader(in);
 
-//                    DataOutputStream out = new DataOutputStream(server.getOutputStream());
-//                    out.writeUTF("Thank you for connecting to " + server.getLocalSocketAddress()
-//                        + "\nGoodbye!");
-//                    System.out.println("Hello!");
-        server.close();
-
-
-      } catch(IOException e) {
-        System.out.println("IOException was thrown");
-        e.printStackTrace();
-        break;
+      String line = "";
+      while (true) {
+        try {
+          out.writeChars("Please input JSON value: \n");
+          out.flush();
+          numJsons.add(JsonParser.parseReader(jsonReader));
+        } catch (Exception e) {
+          break;
+        }
       }
+
+
+      String complete = "";
+      for (int i = 0; i < numJsons.size(); i++) {
+        String object = "{ 'object' : ";
+        String total = " 'total' : ";
+        if (numJsons.size() == 1) {
+          // if there is only one NumJSON given, we can just begin and end the string with brackets
+          complete += "[ " + object + numJsons.get(i).toString() + total + result
+              .jsonMath(numJsons.get(i)) + " }" + " ]";
+        } else if (i == 0) {
+          // for the first NumJSON given, we ensure it begins with a bracket.
+          complete += "[ " + object + numJsons.get(i).toString() + total + result
+              .jsonMath(numJsons.get(i)) + " }";
+        } else if (i == numJsons.size() - 1) {
+          // for the last NumJSON given, we insert a comma prior, and add an ending bracket
+          complete += ", " + object + numJsons.get(i).toString() + total + result
+              .jsonMath(numJsons.get(i)) + " }" + " ]";
+        } else {
+          // for all other cases, we can assume there is a prior NumJSON and a following one, so we insert a comma
+          complete += ", " + object + numJsons.get(i).toString() + total + result
+              .jsonMath(numJsons.get(i)) + " }";
+        }
+      }
+      // Now we output the entire formatted string
+      System.out.println(complete);
+
+      ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+      oos.writeObject(complete);
+      oos.close();
+      server.close();
+
+    } catch(IOException e) {
+      System.out.println("IOException was thrown!");
+
     }
+
   }
   public static void main(String[] args) {
     // write your code here
