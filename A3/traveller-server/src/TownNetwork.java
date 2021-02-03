@@ -15,11 +15,17 @@ public class TownNetwork {
   }
 
   public void addTown(Town t) {
+    if(!(t instanceof Town)) {
+      throw new IllegalArgumentException("Not given a town!");
+    }
     this.towns.add(t);
     this.characterPositions.put(t, "");
   }
 
   public void addPath(Town t1, Town t2) {
+    if(!(t1 instanceof Town) || !(t2 instanceof Town)) {
+      throw new IllegalArgumentException("Not given a town!");
+    }
     Town[] newPath = new Town[2];
     newPath[0] = t1;
     newPath[1] = t2;
