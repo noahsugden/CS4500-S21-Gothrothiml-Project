@@ -15,23 +15,28 @@ public class TownNetwork {
   }
 
   public void addTown(Town t) {
-    if(!(t instanceof Town)) {
-      throw new IllegalArgumentException("Not given a town!");
+    if(this.towns.contains(t)) {
+      throw new IllegalArgumentException("town is already in network");
     }
     this.towns.add(t);
     this.characterPositions.put(t, "");
   }
 
   public void addPath(Town t1, Town t2) {
-    if(!(t1 instanceof Town) || !(t2 instanceof Town)) {
-      throw new IllegalArgumentException("Not given a town!");
+    if(!this.towns.contains(t1) || !this.towns.contains(t2) || this.pathExists(t1, t2)) {
+      throw new IllegalArgumentException("unable to add path");
     }
     Town[] newPath = new Town[2];
     newPath[0] = t1;
     newPath[1] = t2;
     paths.add(newPath);
     t1.addPath(t2);
-    t2.addPath(t1);
+    for(Town town: t1.reachableTowns) {
+      if (!(town.reachableTowns.contains(t2))) {
+        town.addPath(t2);
+      }
+
+    }
   }
 
   public void placeCharacter(Character c, Town t) {
@@ -43,13 +48,13 @@ public class TownNetwork {
       }
       characterPositions.replace(t, c.getName());
     } else {
-      System.out.println("Unable to place character.  Town already contains character.");
+      throw new IllegalArgumentException("Unable to place character.  Town already contains character.");
     }
   }
 
   public boolean canReach(Character c, Town t) {
     boolean hasTown = false;
-    Town startTown = new Town();
+    Town startTown = new Town("");
 
     for (Map.Entry<Town,String> entry : characterPositions.entrySet()) {
       if (entry.getValue().equals(c.getName())) {
@@ -61,12 +66,30 @@ public class TownNetwork {
       if (characterPositions.get(t).equals(c.getName())) {
         return true;
       } else {
+        for (int i = 0; i < startTown.reachableTowns.size(); i++) {
+          System.out.println("t " + startTown.reachableTowns.get(i).townName);
+        }
+
+        System.out.println(" " + startTown.canReach(t));
         return startTown.canReach(t);
       }
     } else {
       return false;
     }
 
+  }
+
+  private boolean pathExists(Town t1, Town t2) {
+    if (this.paths.isEmpty()) {
+      return false;
+    }
+    for (int i = 0; i < this.paths.size(); i++) {
+      if ((this.paths.get(i)[0].equals(t1) && this.paths.get(i)[1].equals(t2)) ||
+              (this.paths.get(i)[0].equals(t2) && this.paths.get(i)[1].equals(t1))) {
+        return true;
+      }
+    }
+    return false;
   }
 
 
