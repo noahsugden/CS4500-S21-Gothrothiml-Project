@@ -78,9 +78,9 @@ public class TownNetworksTests {
     massTowns.addTown(newton);
     massTowns.addPath(boston, waltham);
     massTowns.placeCharacter(noah, boston);
-//    assertEquals(massTowns.canReach(noah, boston), true);
-//    assertEquals(massTowns.canReach(noah, waltham), true);
-//    assertEquals(massTowns.canReach(noah, newton), false);
+    assertEquals(massTowns.canReach(noah, boston), true);
+    assertEquals(massTowns.canReach(noah, waltham), true);
+    assertEquals(massTowns.canReach(noah, newton), false);
     massTowns.addPath(waltham, newton);
     assertEquals(massTowns.canReach(noah, newton), true);
   }
