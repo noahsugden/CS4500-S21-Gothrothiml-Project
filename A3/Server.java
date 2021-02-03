@@ -64,8 +64,12 @@ public class Server extends Thread {
         try {
           out.writeChars("Please input JSON value: \n");
           out.flush();
+          JsonParser parser = JsonParser.parseReader(jsonReader);
+          if(parser.equals("END\n")) {
+            break;
+          }
           // reads the next available numJson element
-          numJsons.add(JsonParser.parseReader(jsonReader));
+          numJsons.add(parser);
         } catch (Exception e) {
           // once EOF is reached, an exception
           break;
