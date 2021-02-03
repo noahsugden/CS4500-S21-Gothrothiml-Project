@@ -97,8 +97,9 @@ public class Server extends Thread {
       // Now we output the entire formatted string
       System.out.println(complete);
 
-      //Sends the formatted string to the client
+
       ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+      //Sends the formatted string to the client
       oos.writeObject(complete);
 
       oos.close();
