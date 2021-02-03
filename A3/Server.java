@@ -7,29 +7,54 @@ import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a Server with its corresponding input and output stream.
+ */
 public class Server extends Thread {
 
-  private ServerSocket server;
-  private DataOutputStream out;
   BufferedReader in;
   List<JsonElement> numJsons = new ArrayList<>();
   JsonReader jsonReader;
   Socket socket;
+  private ServerSocket server;
+  private DataOutputStream out;
 
+  /**
+   * Constructor that represents a Server connected to port 8000
+   *
+   * @throws IOException if an error happens when connecting with the socket
+   */
   public Server() throws IOException {
     server = new ServerSocket();
     server.setSoTimeout(0);
   }
 
+  public static void main(String[] args) {
+    // write your code here
+    try {
+      Thread t = new Server();
+      t.start();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * To create a server that can be accessed by a client via a TCP connection on port 8000.
+   */
   public void run() {
+    //Only capable of adding JSON values.
     Operation result = new Addition();
     try {
+      //Connects the server to port 8000
       server = new ServerSocket(8000);
       System.out.println("Server started...");
       socket = server.accept();
       System.out.println("Client has been accepted...");
+      //BufferedReader is initialized
       in = new BufferedReader(
           new InputStreamReader(socket.getInputStream()));
+      //OutputStream is initialized
       out = new DataOutputStream(
           new BufferedOutputStream(socket.getOutputStream()));
       jsonReader = new JsonReader(in);
@@ -39,12 +64,13 @@ public class Server extends Thread {
         try {
           out.writeChars("Please input JSON value: \n");
           out.flush();
+          // reads the next available numJson element
           numJsons.add(JsonParser.parseReader(jsonReader));
         } catch (Exception e) {
+          // once EOF is reached, an exception
           break;
         }
       }
-
 
       String complete = "";
       for (int i = 0; i < numJsons.size(); i++) {
@@ -71,26 +97,18 @@ public class Server extends Thread {
       // Now we output the entire formatted string
       System.out.println(complete);
 
+      //Sends the formatted string to the client
       ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
       oos.writeObject(complete);
+
       oos.close();
       server.close();
 
-    } catch(IOException e) {
+    } catch (IOException e) {
       System.out.println("IOException was thrown!");
 
     }
 
-  }
-  public static void main(String[] args) {
-    // write your code here
-    System.out.println(args[0]);
-    try {
-      Thread t = new Server();
-      t.start();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 }
 
