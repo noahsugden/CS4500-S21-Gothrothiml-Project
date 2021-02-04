@@ -4,16 +4,20 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+/**
+ * To test all methods in the TownNetwork class
+ */
 public class TownNetworksTests {
   Town boston = new Town("boston");
   Town waltham = new Town("waltham");
   Town newton = new Town("newton");
-  Town stoughton = new Town("stoughton");
-  Town watertown = new Town("watertown");
   Character noah = new Character("noah");
   Character benjamin = new Character("benjamin");
   TownNetwork massTowns = new TownNetwork();
 
+  /**
+   * To test the addTown method
+   */
   @Test
   public void testAddTown() {
     massTowns.addTown(boston);
@@ -24,12 +28,19 @@ public class TownNetworksTests {
     assertEquals(townArrayList, massTowns.towns);
   }
 
+  /**
+   * To test that an IllegalArgumentException is thrown when trying to add a Town
+   * that is already in the TownNetwork
+   */
   @Test(expected = IllegalArgumentException.class)
   public void testAddTownError1() {
     massTowns.addTown(boston);
     massTowns.addTown(boston);
   }
 
+  /**
+   * To test the addPath method
+   */
   @Test
   public void testAddPath() {
     massTowns.addTown(boston);
@@ -39,12 +50,20 @@ public class TownNetworksTests {
     assertEquals("waltham", massTowns.paths.get(0)[1].townName);
   }
 
+  /**
+   * To test that an IllegalArgumentException is thrown when trying to add a path between Towns
+   * that are not both in the TownNetwork
+   */
   @Test(expected = IllegalArgumentException.class)
   public void testAddPathError1() {
     massTowns.addTown(boston);
     massTowns.addPath(boston, waltham);
   }
 
+  /**
+   * To test that an IllegalArgumentException is thrown when trying to add a path
+   * that already exists
+   */
   @Test(expected = IllegalArgumentException.class)
   public void testAddPathError2() {
     massTowns.addTown(boston);
@@ -53,6 +72,9 @@ public class TownNetworksTests {
     massTowns.addPath(waltham, boston);
   }
 
+  /**
+   * To test the placeCharacter method
+   */
   @Test
   public void testPlaceCharacter() {
     massTowns.addTown(boston);
@@ -64,6 +86,10 @@ public class TownNetworksTests {
     assertEquals(massTowns.characterPositions.get(boston), "");
   }
 
+  /**
+   * To test that an IllegalArgumentException is thrown when trying to place a Character
+   * in a Town that is already occupied
+   */
   @Test(expected = IllegalArgumentException.class)
   public void testPlaceCharacterError1() {
     massTowns.addTown(boston);
@@ -71,6 +97,9 @@ public class TownNetworksTests {
     massTowns.placeCharacter(benjamin, boston);
   }
 
+  /**
+   * To test the canReach method
+   */
   @Test
   public void testCanReach() {
     massTowns.addTown(boston);
