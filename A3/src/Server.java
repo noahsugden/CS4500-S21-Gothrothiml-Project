@@ -1,6 +1,7 @@
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+//import com.google.gson.JsonElement;
+////import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.*;
 import java.net.*;
 import java.io.*;
 import java.nio.Buffer;
@@ -64,11 +65,12 @@ public class Server extends Thread {
         try {
           out.writeChars("Please input JSON value: \n");
           out.flush();
-          JsonParser parser = JsonParser.parseReader(jsonReader);
-          if(parser.equals("END\n")) {
+          JsonElement parser = JsonParser.parseReader(jsonReader);
+          if(parser.equals("\nEND")) {
             break;
           }
           // reads the next available numJson element
+          System.out.println(" " + parser);
           numJsons.add(parser);
         } catch (Exception e) {
           // once EOF is reached, an exception
