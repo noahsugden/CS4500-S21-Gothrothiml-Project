@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="Gothrothiml:jar">
+    <output-path>$PROJECT_DIR$/A3/out/artifacts/Gothrothiml_jar</output-path>
+    <root id="archive" name="Gothrothiml.jar">
+      <element id="module-output" name="Gothrothiml" />
+    </root>
+  </artifact>
+</component>

@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/A3/traveller-server/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/A3/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/A3/traveller-client/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/A4/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -25,6 +26,24 @@
       <library>
         <CLASSES>
           <root url="jar://$USER_HOME$/Downloads/gson-2.8.6-1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Downloads/json-20201115.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Downloads/a2-exec/gson-2.8.6.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
