@@ -22,15 +22,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/gson-2.8.6-1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="library" exported="" name="Unnamed" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -44,6 +36,16 @@
       <library>
         <CLASSES>
           <root url="jar://$USER_HOME$/Downloads/a2-exec/gson-2.8.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="org.json-20120521" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://D:/Download/gson-2.8.6-1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

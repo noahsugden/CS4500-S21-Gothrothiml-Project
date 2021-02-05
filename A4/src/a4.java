@@ -4,10 +4,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 import org.json.*;
 
@@ -16,8 +15,12 @@ public class a4 {
   public static int port;
   public static String ipAddress;
   public static String userName;
+  Map<String,String> characterMap = new HashMap<>();
+  private static List<String> characters = new ArrayList<>();
+  private static List<String> nodes = new ArrayList<>();
 
-  public static void main(String[] args) {
+
+  public static void main(String[] args) throws SocketException {
     //If given no command line arguments, then initialize values to default values
     if (args.length == 0) {
       port = 8000;
@@ -51,17 +54,19 @@ public class a4 {
     a4 client = new a4();
   }
 
-  public a4() {
+  public a4() throws SocketException {
     Socket client;
     BufferedReader inServer;
     DataOutputStream out;
     BufferedReader inUser;
     String sessionId;
-    JSONArray sessionArray = new JSONArray();
+    JSONArray nameArray = new JSONArray();
+
 
     try {
       //Creates a connection to the server
       client = new Socket(ipAddress, port);
+      client.setKeepAlive(true);
       inServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
       inUser = new BufferedReader(new InputStreamReader(System.in));
       out = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
@@ -69,77 +74,107 @@ public class a4 {
       //Writes a message to the server in bytes
       out.write(userName.getBytes());
       sessionId = inServer.readLine();
-      sessionArray.put("The server will call me");
-      sessionArray.put(sessionId);
-      System.out.println(sessionArray);
+      nameArray.put("The server will call me");
+      nameArray.put(userName);
+      System.out.println(nameArray);
+
+      //read from stdin once for road network
+      String roadJson = inUser.readLine();
+      String modRoadJson = roadParser(roadJson);
+      if (modRoadJson.equals("roads first")) {
+        client.close();
+      }
+      out.write(modRoadJson.getBytes());
+      while (client.getKeepAlive()) {
+        inUser.readLine();
+
+      }
+
+
+
+
+   /*   JSONTokener newTokener = new JSONTokener(newInput);
+      JSONObject newObject = (JSONObject) newTokener.nextValue();
+      String newCommand = newObject.getString("command");
+      if (newCommand.equals("place")) {
+        placeCharacter(newObject.getJSONObject("params"));
+      } else if (newCommand.equals("passage-safe?")) {
+        query(newObject);
+      } else {
+        throw new JSONException("bad command");
+      }*/
 
 
     } catch (UnknownHostException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
+    } catch (JSONException e) {
+      e.printStackTrace();
     }
 
 
   }
 
+  public String roadParser(String roadJson) throws JSONException {
 
-  public void jsonParser(String json) {
-
-    private static List<String> characters = new ArrayList<>();
-    private static List<String> nodes = new ArrayList<>();
-
-
-      JSONTokener jsonToken = new JSONTokener(json);
-
-      JSONObject roadObject = (JSONObject) jsonToken.nextValue();
-      String command = roadObject.getString("command");
-      if (!command.equals("roads")) {
-        System.out.print("roads first");
-        return;
+    // create a road network
+    JSONTokener jsonToken = new JSONTokener(roadJson);
+    JSONObject roadObject = (JSONObject) jsonToken.nextValue();
+    String command = roadObject.getString("command");
+    if (!command.equals("roads")) {
+      System.out.print("roads first");
+      return "roads first";
+    }
+    JSONArray roadParams = roadObject.getJSONArray("params");
+    for (int i = 0; i < roadParams.length(); ++i) {
+      JSONObject param = roadParams.getJSONObject(i);
+      String from = param.getString("from");
+      String to = param.getString("to");
+      if (!nodes.contains(from)) {
+        nodes.add(from);
       }
-      JSONArray roadParams = roadObject.getJSONArray("params");
-      for (int i = 0; i < roadParams.length(); ++i) {
-        JSONObject param = roadParams.getJSONObject(i);
-        String from = param.getString("from");
-        String to = param.getString("to");
-        if (!nodes.contains(from)) {
-          nodes.add(from);
-        }
-        if (!nodes.contains(to)) {
-          nodes.add(to);
-        }
-        //call the townnetwork class function here to create a new road
+      if (!nodes.contains(to)) {
+        nodes.add(to);
       }
+    }
+
+    JSONObject modRoadObject = new JSONObject();
+    JSONArray townArray = new JSONArray();
+    for (int j=0; j<nodes.size();j++) {
+      townArray.put(nodes.get(j));
+    }
+    modRoadObject.put("towns", townArray);
+    modRoadObject.put("road", roadParams);
 
 
-      JSONTokener characters = new JSONTokener(characterInput);
-      JSONObject characterObject = (JSONObject) characters.nextValue();
+    return modRoadObject.toString();
+  }
+
+
+  public void jsonParser(String json) throws JSONException {
+
+
+
+
+
+
+      String characterInput ="";
+      JSONTokener characterToken = new JSONTokener(characterInput);
+      JSONObject characterObject = (JSONObject) characterToken.nextValue();
       String place = characterObject.getString("command");
       if (!place.equals("place")) {
         System.out.print("Place characters now");
         return;
       }
       JSONObject single = characterObject.getJSONObject("params");
-      placeCharacter(single);
 
-      while (true) {
-        String newInput = sc.nextLine();
-        if (newInput.equals("END")) {
-          return;
-        }
-        JSONTokener newTokener = new JSONTokener(newInput);
-        JSONObject newObject = (JSONObject) newTokener.nextValue();
-        String newCommand = newObject.getString("command");
-        if (newCommand.equals("place")) {
-          placeCharacter(newObject.getJSONObject("params"));
-        } else if (newCommand.equals("passage-safe?")) {
-          query(newObject);
-        } else {
-          throw new JSONException("bad command");
-        }
+      characterMap.put(single.get("character").toString(), single.get("town").toString());
 
-      }
+
+
+
+
 
     }
 
