@@ -1,13 +1,11 @@
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.*;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.json.*;
 
 public class a4 {
@@ -16,7 +14,7 @@ public class a4 {
   public static String ipAddress;
   public static String userName;
   private static Map<String,String> characterMap = new HashMap<>();
-  private static Map<String,String> queryMap = new HashMap<>();
+  private static List<String> queryList = new ArrayList<>();
   private static List<String> characters = new ArrayList<>();
   private static List<String> nodes = new ArrayList<>();
 
@@ -76,7 +74,6 @@ public class a4 {
       out = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
 
 
-
       //Writes a message to the server in bytes
       out.write(userName.getBytes());
       sessionId = inServer.readLine();
@@ -84,30 +81,64 @@ public class a4 {
       nameArray.put(userName);
       System.out.println(nameArray);
 
+
       //read from stdin once for road network
-      String roadJson = inUser.readLine();
-      //check if roadJson is a well-formed json
-      if (!checkRequest(roadJson)) {
-        JSONObject error = new JSONObject();
-        error.put("error", "not a request");
-        error.put("object", roadJson);
-      }
-      String modRoadJson = roadParser(roadJson);
-      if (modRoadJson.equals("roads first")) {
-        client.close();
-      }
-      //send the create request to the server
-      out.write(modRoadJson.getBytes());
 
 
-      while (client.getKeepAlive()) {
-        String singleRequest = inUser.readLine();
-        int result = jsonParser(singleRequest);
-        //once a query request is put in or stdin closes, send a batch request to the server
-        if (result == 1 ) {
+        String roadJson = inUser.readLine();
 
+
+        //check if roadJson is a well-formed json
+        if (!checkRequest(roadJson)) {
+          JSONObject error = new JSONObject();
+          error.put("error", "not a request");
+          error.put("object", roadJson);
+          System.out.print(error.toString());
+        }
+        String modRoadJson = roadParser(roadJson);
+        if (modRoadJson.equals("roads first")) {
+          client.close();
+        }
+        //send the create request to the server
+        out.write(modRoadJson.getBytes());
+
+
+      try {
+        while (true) {
+          String singleRequest = inUser.readLine();
+          int result = jsonParser(singleRequest);
+
+        //  System.out.print(result);
+          //once a query request is put in or stdin closes, send a batch request to the server
+          if (result == 1) {
+            //send the batch to the server
+            out.write(newBatchRequest().getBytes());
+            String response = inServer.readLine();
+            JSONTokener jsonToken = new JSONTokener(response);
+            JSONObject responseObject = (JSONObject) jsonToken.nextValue();
+            boolean responseBoolean = responseObject.getBoolean("response");
+            String responseArrayString = createBooleanResponse(responseBoolean);
+            System.out.print(responseArrayString);
+            characterMap = new HashMap<>();
+            queryList = new ArrayList<>();
+            characters = new ArrayList<>();
+
+            //the query request is not valid
+          } else if (result ==2) {
+            client.close();
+            break;
+          }
 
         }
+      } catch (Exception e) {
+        out.write(newBatchRequest().getBytes());
+        String response = inServer.readLine();
+        JSONTokener jsonToken = new JSONTokener(response);
+        JSONObject responseObject = (JSONObject) jsonToken.nextValue();
+        boolean responseBoolean = responseObject.getBoolean("response");
+        String responseArrayString = createBooleanResponse(responseBoolean);
+        System.out.print(responseArrayString);
+        client.close();
 
 
       }
@@ -135,7 +166,6 @@ public class a4 {
     JSONObject roadObject = (JSONObject) jsonToken.nextValue();
     String command = roadObject.getString("command");
     if (!command.equals("roads")) {
-      System.out.print("roads first");
       return "roads first";
     }
     JSONArray roadParams = roadObject.getJSONArray("params");
@@ -170,19 +200,23 @@ public class a4 {
       JSONTokener requestToken = new JSONTokener(json);
       JSONObject request = (JSONObject) requestToken.nextValue();
       String commandType = request.getString("command");
+
       JSONObject requestParams = request.getJSONObject("params");
       String townName = requestParams.get("town").toString();
       String characterName = requestParams.get("character").toString();
       if (commandType.equals("place")) {
         if (nodes.contains(townName)) {
+          characters.add(characterName);
           characterMap.put(characterName, townName);
           return 0;
         } else {
           System.out.print(responseInvalidPlacement(requestParams));
+          return 2;
         }
       } else if (commandType.equals("passage-safe?")) {
         if (characters.contains(characterName) && nodes.contains(townName)) {
-          queryMap.put(characterName,townName);
+          queryList.add(characterName);
+          queryList.add(townName);
           return 1;
         } else {
           return 2;
@@ -197,12 +231,30 @@ public class a4 {
   public static boolean checkRequest(String json) throws JSONException {
     JSONTokener jsonToken = new JSONTokener(json);
     JSONObject request = (JSONObject) jsonToken.nextValue();
-    String command = request.getString("command");
+    String command = request.get("command").toString();
     if (command.equals("roads") || command.equals("place") || command.equals("passage-safe?")) {
-      return true;
+      switch (command) {
+        case "roads":
+          if (request.get("params") instanceof JSONArray) {
+            return true;
+          } else {
+            return false;
+          }
+        case "place":
+        case "passage-safe?":
+          if (request.get("params") instanceof JSONObject) {
+            return true;
+          } else {
+            return false;
+          }
+
+        default:return false;
+      }
+
     } else {
       return false;
     }
+
 
   }
 
@@ -211,18 +263,43 @@ public class a4 {
     JSONArray response = new JSONArray();
     response.put("invalid placement");
     response.put(invalidParams);
-
     return response.toString();
   }
 
   //create a new batch request based on the maps
-  public static String newBatchRequest(){
+  public static String newBatchRequest() throws JSONException {
     JSONArray placeArray = new JSONArray();
-    for (int i =0 ;i<characterMap.size();i++) {
-
-
+    for (String s:characterMap.keySet()) {
+      JSONObject object = new JSONObject();
+      object.put("name",s);
+      object.put("town",characterMap.get(s));
+      placeArray.put(object);
     }
+    JSONObject batchObject = new JSONObject();
+    batchObject.put("characters", placeArray);
+    JSONObject queryObject = new JSONObject();
+    queryObject.put("character", queryList.get(0));
+    queryObject.put("destination", queryList.get(1));
+    batchObject.put("query", queryObject);
 
-    return "";
+
+    return batchObject.toString();
   }
+
+
+  //create a new json array for the boolean response
+  public static String createBooleanResponse(boolean response ) throws JSONException {
+    JSONArray booleanArray = new JSONArray();
+    booleanArray.put("the response for");
+    JSONObject queryObject = new JSONObject();
+    queryObject.put("character", queryList.get(0));
+    queryObject.put("destination", queryList.get(1));
+    booleanArray.put(queryObject);
+    booleanArray.put("is");
+    booleanArray.put(response);
+
+
+    return booleanArray.toString();
+  }
+
 }
