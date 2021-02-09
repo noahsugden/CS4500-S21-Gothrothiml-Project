@@ -17,7 +17,7 @@
                                    |                           |                         |                                 |                            |
                                    |                           |  Update tile's status   |                                 |                            |
                                    |                           |  including tracking     |                                 |                            |
-Update status after interaction    +<--------------------------+  player and the key     |                                 |                            |
+    Update status after interaction +<--------------------------+  player and the key    |                                 |                            |
                                    |                           |                         |                                 |                            |
                                    |                           |                         |                                 |                            |
                                    |                           |                         |                                 |                            |
@@ -59,12 +59,12 @@ Update status after interaction    +<--------------------------+  player and the
                                                                                                                            
 
 
-Adversary   round
+     Adversary   round
 
 
-+----------------------------------------------------------------------------------------------------------------------------+
+     +----------------------------------------------------------------------------------------------------------------------------+
 
-Player                                   Destination Tile for Adversary                  Adversary
+    Player                                   Destination Tile for Adversary                  Adversary
 
      +                                                     +                                    +
      |                                                     |                                    |
