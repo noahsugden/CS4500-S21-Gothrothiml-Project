@@ -1,9 +1,6 @@
                                   Player round
-
-
      +----------------------------------------------------------------------------------------------------------------------------+
-
-                              Player             Destination Tile for Player          Level                             Dungeon                     Next Level
+                            Player             Destination Tile for Player          Level                             Dungeon                     Next Level
                                    +                           +
                                    |                           |                         +                                 +                            +
                                    |                           |                         |                                 |                            |
@@ -56,16 +53,9 @@
                                                                                                                            |
                                                                                                                            |
                                                                                                                            |
-                                                                                                                           
-
-
-     Adversary   round
-
-
+                                                            Adversary   round
      +----------------------------------------------------------------------------------------------------------------------------+
-
     Player                                   Destination Tile for Adversary                  Adversary
-
      +                                                     +                                    +
      |                                                     |                                    |
      |                                                     |                                    |
@@ -91,7 +81,6 @@
      |                                                     |                                    |
      |                                                     |                                    |
      |                                                     |                                    |
-     |                                                     |                                    |
-     |                                                     |                                    |
-     |         
+
+        
                                                                                               ++
