@@ -1,15 +1,14 @@
                                   Player round
 
+ +----------------------------------------------------------------------------------------------------------------------------+
 
-                              +----------------------------------------------------------------------------------------------------------------------------+
-
-                              Player             Destination Tile for Player          Level                             Dungeon                     Next Level
+                              Player             Destination Tile for Player          Level                     Dungeon                     Next Level
                                    +                           +
-                                   |                           |                         +                                 +                            +
-                                   |                           |                         |                                 |                            |
-                                   |                           |                         |                                 |                            |
-      Move to the Destination Tile | +------------------------>+                         |                                 |                            |
-                                   |                           |                         |                                 |                            |
+                                   |                           |                         +                      +                            +
+                                   |                           |                         |                      |                            |
+                                   |                           |                         |                      |                            |
+      Move to the Destination Tile | +------------------------>+                         |                      |                            |
+                                   |                           |                         |                            |                            |
                                    |                           |                         |                                 |                            |
                                    |                           |                         |                                 |                            |
                                    |                           |                         |                                 |                            |
@@ -17,7 +16,7 @@
                                    |                           |                         |                                 |                            |
                                    |                           |  Update tile's status   |                                 |                            |
                                    |                           |  including tracking     |                                 |                            |
-Update status after interaction    +<--------------------------+  player and the key     |                                 |                            |
+      Update status after interaction +<--------------------------+  player and the key  |                                 |                            |
                                    |                           |                         |                                 |                            |
                                    |                           |                         |                                 |                            |
                                    |                           |                         |                                 |                            |
@@ -57,34 +56,17 @@ Update status after interaction    +<--------------------------+  player and the
                                                                                                                            |
                                                                                                                            |
                                                                                                                            ++
-.....
 
 
 
 
 
+     Adversary   round
 
 
+     +----------------------------------------------------------------------------------------------------------------------------+
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Adversary   round
-
-
-+----------------------------------------------------------------------------------------------------------------------------+
-
-Player                                   Destination Tile for Adversary                  Adversary
+     Player                                   Destination Tile for Adversary                  Adversary
 
      +                                                     +                                    +
      |                                                     |                                    |
