@@ -6,7 +6,7 @@ inventory system is implemented, then if other items are found they would be pla
 There will be a method move(Tile destination), which takes the Player to the given 
 unoccupied Tile. Inside this method, another helper method, interact() will be 
 called, which updates the Player's status based on the Player's interactions with the items on 
-the Tile they moved to.
+the Tile they moved to. Inside move() method, another helper method, update(Player) will be called, which updates the tile's status.
 
 There will be a Dungeon class, which will have a field that is a list of Levels, each Level will
 be its own class and consist of Rooms and Hallways, which are also separate classes. It will
