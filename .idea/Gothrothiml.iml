@@ -10,6 +10,7 @@
       <sourceFolder url="file://$MODULE_DIR$/A3/traveller-client/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/A4/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Snarl/Game/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Snarl/Game/test" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -24,29 +25,20 @@
       </library>
     </orderEntry>
     <orderEntry type="library" exported="" name="Unnamed" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/json-20201115.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/a2-exec/gson-2.8.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="org.json-20120521" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://D:/Download/gson-2.8.6-1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../Northeastern University/2020-2021/CS4500/Warm-Up-Assignment2/a2-exec/gson-2.8.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../Northeastern University/2020-2021/CS4500/Warm-Up-Assignment2/json-20201115.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
