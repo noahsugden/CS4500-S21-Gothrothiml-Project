@@ -12,6 +12,7 @@ public class Hallway {
     this.init = i;
     this.end = e;
     this.waypoints = w;
+    this.putHallwayLayout();
   }
 
   private void putHallwayLayout() {
@@ -25,6 +26,18 @@ public class Hallway {
         this.compareTwoPositions(curr, waypoints.get(i + 1));
       }
     }
+  }
+
+  public HashMap<Position, Integer> getHallwayLayout() {
+    return this.hallwayLayout;
+  }
+
+  public Position getInit() {
+    return this.init;
+  }
+
+  public Position getEnd() {
+    return this.end;
   }
 
   private void compareTwoPositions(Position pre, Position next) {
