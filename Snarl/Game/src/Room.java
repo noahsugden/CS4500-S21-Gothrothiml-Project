@@ -52,31 +52,31 @@ public class Room {
   private void putBoundaries() {
     roomLayout.put(upperLeft, 3);
     //Adds upper part boundary
-    for (int i = 1; i <= width; i++) {
+    for (int i = 1; i < width; i++) {
       Position curr = new Position(i + upperLeft.getx(), upperLeft.gety());
       roomLayout.put(curr, 3);
-      System.out.println("X Wposition is: " + curr.getx() + " Y Wposition is: " + curr.gety());
+     // System.out.println("X Wposition is: " + curr.getx() + " Y Wposition is: " + curr.gety());
     }
 
     //Adds left part boundary
-    for (int i = 1; i <= height; i++) {
+    for (int i = 1; i < height; i++) {
       Position curr = new Position(upperLeft.getx(), i + upperLeft.gety());
       roomLayout.put(curr, 3);
-      System.out.println("X Hposition is: " + curr.getx() + " Y Hposition is: " + curr.gety());
+    //  System.out.println("X Hposition is: " + curr.getx() + " Y Hposition is: " + curr.gety());
     }
 
     //Adds bottom part boundary
-    for (int i = 1; i <= width; i++) {
-      Position curr = new Position(i + upperLeft.getx(), upperLeft.gety() + height);
+    for (int i = 1; i < width; i++) {
+      Position curr = new Position(i + upperLeft.getx(), upperLeft.gety() + height-1);
       roomLayout.put(curr, 3);
-      System.out.println("X Wposition is: " + curr.getx() + " Y Wposition is: " + curr.gety());
+   //   System.out.println("X Wposition is: " + curr.getx() + " Y Wposition is: " + curr.gety());
     }
 
     //Add right part boundary
-    for (int i = 1; i <= height; i++) {
-      Position curr = new Position(upperLeft.getx() + width, i + upperLeft.gety());
+    for (int i = 1; i < height; i++) {
+      Position curr = new Position(upperLeft.getx() + width -1, i + upperLeft.gety());
       roomLayout.put(curr, 3);
-      System.out.println("X Hposition is: " + curr.getx() + " Y Hposition is: " + curr.gety());
+    //  System.out.println("X Hposition is: " + curr.getx() + " Y Hposition is: " + curr.gety());
     }
 
   }
@@ -84,6 +84,7 @@ public class Room {
   private void putDoors() {
     for (int i = 0; i < this.doors.size(); i++) {
       Position curr = this.doors.get(i);
+   //   curr.print();
       roomLayout.put(curr, 4);
     }
   }
@@ -96,10 +97,13 @@ public class Room {
   }
 
   private void putWallTiles() {
-    for (int x = upperLeft.getx(); x <= upperLeft.getx() + width; x++) {
-      for (int y = upperLeft.gety(); y <= upperLeft.gety() + height; y++) {
+    for (int x = upperLeft.getx(); x < upperLeft.getx() + width; x++) {
+      for (int y = upperLeft.gety(); y < upperLeft.gety() + height; y++) {
         Position curr = new Position(x, y);
-        if (roomLayout.get(curr) != 2 || roomLayout.get(curr) != 3 || roomLayout.get(curr) != 4) {
+        if (roomLayout.get(curr) ==null) {
+          roomLayout.put(curr,1);
+        }
+          else if (roomLayout.get(curr) != 2 &&  roomLayout.get(curr) != 4) {
           roomLayout.put(curr, 1);
         }
       }

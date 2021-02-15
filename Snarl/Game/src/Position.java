@@ -24,12 +24,22 @@ public class Position
     y = a;
   }//method sety
 
-  public boolean equals(Position p) {
-    if (this.x == p.getx() && this.y == p.gety()) {
+  @Override
+  public boolean equals(final Object o) {
+    if (o == null) {
+      return false;
+    }
+    Position temp = (Position) o;
+    if (this.x == temp.getx() && this.y == temp.gety()) {
       return true;
     } else {
       return false;
     }
+  }
+
+  @Override
+  public int hashCode() {
+    return 31* this.x + this.y;
   }
 
   Position ()
@@ -43,6 +53,9 @@ public class Position
     y = b;
   }
 
+  public void print() {
+    System.out.print("X Hposition is: " + this.getx() + " Y Hposition is: " + this.gety()+ "\n")  ;
+  }
 
 }
 
