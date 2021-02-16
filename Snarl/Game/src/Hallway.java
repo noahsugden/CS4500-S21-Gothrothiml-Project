@@ -24,14 +24,17 @@ public class Hallway {
       this.compareTwoPositions(this.init, curr);
       this.compareTwoPositions(curr,end);
     }
-    for (int i = 0; i < waypoints.size(); i++) {
-      Position curr = waypoints.get(i);
-      if (i == 0) {
-        this.compareTwoPositions(this.init, curr);
-      } else if (i == waypoints.size() - 1) {
-        this.compareTwoPositions(curr, this.end);
-      } else {
-        this.compareTwoPositions(curr, waypoints.get(i + 1));
+    if (waypoints.size() >1) {
+      for (int i = 0; i < waypoints.size(); i++) {
+        Position curr = waypoints.get(i);
+        if (i == 0) {
+          this.compareTwoPositions(this.init, curr);
+          this.compareTwoPositions(curr, waypoints.get(1));
+        } else if (i == waypoints.size() - 1) {
+          this.compareTwoPositions(curr, this.end);
+        } else {
+          this.compareTwoPositions(curr, waypoints.get(i + 1));
+        }
       }
     }
 

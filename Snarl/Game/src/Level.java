@@ -1,6 +1,9 @@
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class Level {
   ArrayList<Room> rooms;
@@ -9,7 +12,236 @@ public class Level {
   HashMap<Position, Integer> levelLayout = new HashMap<>();
   Position key;
   Position exit;
-  static int[][] ascii = new int[15][15];
+  static Level finalLevel;
+  //use 2d array to print
+  static int[][] ascii = new int[30][30];
+  //an example of level data
+
+
+
+  //this is an example level data of three rooms, two hallways, an exit and a key
+  static String exampleString2 = "[\n" +
+          "  {\n" +
+          "    \"name\": \"room\",\n" +
+          "    \"upperleft\": [\n" +
+          "      1,\n" +
+          "      1\n" +
+          "    ],\n" +
+          "    \"width\": 5,\n" +
+          "    \"height\": 5,\n" +
+          "    \"tiles\": [\n" +
+          "      [\n" +
+          "        3,\n" +
+          "        3\n" +
+          "      ],\n" +
+          "      [\n" +
+          "        3,\n" +
+          "        4\n" +
+          "      ],\n" +
+          "      [\n" +
+          "        2,\n" +
+          "        3\n" +
+          "      ]\n" +
+          "    ],\n" +
+          "    \"doors\": [\n" +
+          "      [\n" +
+          "        5,\n" +
+          "        5\n" +
+          "      ]\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"room\",\n" +
+          "    \"upperleft\": [\n" +
+          "      8,\n" +
+          "      9\n" +
+          "    ],\n" +
+          "    \"width\": 3,\n" +
+          "    \"height\": 3,\n" +
+          "    \"tiles\": [\n" +
+          "      [\n" +
+          "        9,\n" +
+          "        10\n" +
+          "      ],\n" +
+          "      [\n" +
+          "        9,\n" +
+          "        9\n" +
+          "      ]\n" +
+          "    ],\n" +
+          "    \"doors\": [\n" +
+          "      [\n" +
+          "        10,\n" +
+          "        11\n" +
+          "      ]\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"room\",\n" +
+          "    \"upperleft\": [\n" +
+          "      14,\n" +
+          "      1\n" +
+          "    ],\n" +
+          "    \"width\": 8,\n" +
+          "    \"height\": 6,\n" +
+          "    \"tiles\": [\n" +
+          "      [\n" +
+          "        20,\n" +
+          "        4\n" +
+          "      ],\n" +
+          "      [\n" +
+          "        20,\n" +
+          "        5\n" +
+          "      ],\n" +
+          "      [\n" +
+          "        20,\n" +
+          "        6\n" +
+          "      ]\n" +
+          "    ],\n" +
+          "    \"doors\": [\n" +
+          "      [\n" +
+          "        14,\n" +
+          "        6\n" +
+          "      ],\n" +
+          "      [\n" +
+          "        21,\n" +
+          "        1\n" +
+          "      ]\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"hallway\",\n" +
+          "    \"init\": [\n" +
+          "      21,\n" +
+          "      1\n" +
+          "    ],\n" +
+          "    \"end\": [\n" +
+          "      10,\n" +
+          "      11\n" +
+          "    ],\n" +
+          "    \"waypoints\": [\n" +
+          "      [\n" +
+          "        23,\n" +
+          "        1\n" +
+          "      ],\n" +
+          "      [\n" +
+          "        23,\n" +
+          "        11\n" +
+          "      ]\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"hallway\",\n" +
+          "    \"init\": [\n" +
+          "      5,\n" +
+          "      5\n" +
+          "    ],\n" +
+          "    \"end\": [\n" +
+          "      14,\n" +
+          "      6\n" +
+          "    ],\n" +
+          "    \"waypoints\": [\n" +
+          "      [\n" +
+          "        5,\n" +
+          "        6\n" +
+          "      ]\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"key\",\n" +
+          "    \"position\": [\n" +
+          "      3,\n" +
+          "      3\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"exit\",\n" +
+          "    \"position\": [\n" +
+          "      20,\n" +
+          "      6\n" +
+          "    ]\n" +
+          "  }\n" +
+          "]";
+
+  //this is an example level data for two rooms and a hallway
+  static String exampleString = "[\n" +
+          "  {\n" +
+          "    \"name\": \"room\",\n" +
+          "    \"upperleft\": [\n" +
+          "      0,\n" +
+          "      0\n" +
+          "    ],\n" +
+          "    \"width\": 4,\n" +
+          "    \"height\": 4,\n" +
+          "    \"tiles\": [\n" +
+          "      [\n" +
+          "        2,\n" +
+          "        2\n" +
+          "      ],\n" +
+          "      [\n" +
+          "        2,\n" +
+          "        3\n" +
+          "      ]\n" +
+          "    ],\n" +
+          "    \"doors\": [\n" +
+          "      [\n" +
+          "        3,\n" +
+          "        0\n" +
+          "      ]\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"room\",\n" +
+          "    \"upperleft\": [\n" +
+          "      6,\n" +
+          "      6\n" +
+          "    ],\n" +
+          "    \"width\": 4,\n" +
+          "    \"height\": 4,\n" +
+          "    \"tiles\": [\n" +
+          "      [\n" +
+          "        8,\n" +
+          "        8\n" +
+          "      ]\n" +
+          "    ],\n" +
+          "    \"doors\": [\n" +
+          "      [\n" +
+          "        8,\n" +
+          "        6\n" +
+          "      ]\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"hallway\",\n" +
+          "    \"init\": [\n" +
+          "      3,\n" +
+          "      0\n" +
+          "    ],\n" +
+          "    \"end\": [\n" +
+          "      8,\n" +
+          "      6\n" +
+          "    ],\n" +
+          "    \"waypoints\": [\n" +
+          "      [\n" +
+          "        8,\n" +
+          "        0\n" +
+          "      ]\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"key\",\n" +
+          "    \"position\": [\n" +
+          "      2,\n" +
+          "      2\n" +
+          "    ]\n" +
+          "  },\n" +
+          "  {\n" +
+          "    \"name\": \"exit\",\n" +
+          "    \"position\": [\n" +
+          "      2,\n" +
+          "      3\n" +
+          "    ]\n" +
+          "  }\n" +
+          "]";
 
   public Level() {
     this.rooms = new ArrayList<>();
@@ -55,7 +287,7 @@ public class Level {
     for (Position p:levelLayout.keySet()) {
       int x = p.getx();
       int y = p.gety();
-      ascii[x][y] = levelLayout.get(p);
+      ascii[y][x] = levelLayout.get(p);
     }
   }
 
@@ -108,7 +340,7 @@ public class Level {
     }
 
     if (levelLayout.get(exit) == 2) {
-      levelLayout.put(key, 8);
+      levelLayout.put(exit, 8);
     } else {
       throw new IllegalArgumentException("exit must be inside a room");
     }
@@ -148,10 +380,11 @@ public class Level {
           //7 is a key
         } else if (temp == '7') {
           chars[i] = 'k';
+          //8 is an exit
         } else if (temp == '8') {
           chars[i] = 'e';
         } else if (chars[i] == ',') {
-          chars[i] = ' ';
+          chars[i] = (char) 0;
         }
       }
       String lastString = new String(chars);
@@ -159,6 +392,15 @@ public class Level {
     }
   }
 
+
+  public static void main(String[] args) throws JSONException {
+    //Scanner sc = new Scanner(System.in);
+    //String exampleString = sc.nextLine();
+    //Here is where the level date gets computed. To change to another exmaple input, just change the argument of JsonParser.readString().
+    JsonParser.readString(exampleString2);
+    finalLevel = JsonParser.getCompletelevel();
+    finalLevel.print2D();
+  }
 
 
 }

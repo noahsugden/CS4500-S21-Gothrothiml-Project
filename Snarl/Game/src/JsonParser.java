@@ -10,6 +10,8 @@ public class JsonParser {
     static Position key;
     static Position exit;
 
+    static Level completelevel;
+
     static String room1 = "[\n" +
             "  {\n" +
             "    \"name\": \"room\",\n" +
@@ -112,6 +114,27 @@ public class JsonParser {
     public static String exitString = "[ { name: 'exit',\n" +
             "   position:[2, 3]}]";
 
+
+    public static Level getCompletelevel() {
+        return completelevel;
+    }
+
+    public static ArrayList<Hallway> getHallways() {
+        return hallways;
+    }
+
+    public static ArrayList<Room> getRooms() {
+        return rooms;
+    }
+
+    public static Position getExit() {
+        return exit;
+    }
+
+    public static Position getKey() {
+        return key;
+    }
+
     public static void readRoomObject(JSONObject r) throws JSONException {
         JSONArray upperleftArray = r.getJSONArray("upperleft");
         int UpperX = upperleftArray.getInt(0);
@@ -199,14 +222,11 @@ public class JsonParser {
            }
         }
 
+        completelevel = new Level(rooms,hallways,key,exit);
+
 
      }
 
-     public static void main(String[] args) throws JSONException {
-        readString(exitString);
-        System.out.print(rooms.toString());
-        System.out.print(hallways.toString());
-        System.out.print(exit.toString());
-     }
+
 
 }
