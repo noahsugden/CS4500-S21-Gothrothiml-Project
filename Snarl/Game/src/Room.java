@@ -49,6 +49,30 @@ public class Room {
     return true;
   }
 
+  public Position getUpperLeft() {
+    return upperLeft;
+  }
+
+  public Position getRightBottom() {
+    int x = upperLeft.getx() + width;
+    int y = upperLeft.gety() + height;
+
+    return new Position(x,y);
+  }
+
+  public ArrayList<Position> getTiles() {
+    return tiles;
+  }
+
+  public int getWidth() {
+    return width;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+
+
   private void putBoundaries() {
     roomLayout.put(upperLeft, 3);
     //Adds upper part boundary

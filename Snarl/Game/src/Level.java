@@ -17,6 +17,7 @@ public class Level {
   static int[][] ascii = new int[30][30];
   //an example of level data
 
+  boolean exitStatus;
 
 
   //this is an example level data of three rooms, two hallways, an exit and a key
@@ -283,6 +284,10 @@ public class Level {
     return this.levelLayout;
   }
 
+  public boolean getExitStatus() {
+    return this.exitStatus;
+  }
+
   public void fill2DArray() {
     for (Position p:levelLayout.keySet()) {
       int x = p.getx();
@@ -330,6 +335,10 @@ public class Level {
     }
 
 
+  }
+
+  public void setExitStatus(boolean exitStatus) {
+    this.exitStatus = exitStatus;
   }
 
   private void putKeyandExit() {
@@ -392,15 +401,75 @@ public class Level {
     }
   }
 
+  //To return an unoccupied position in the left-most room
+  public Position findUnoccupiedLeftmost(int id) {
+    Position min = new Position();
+    int upperLeftIndex = -1;
+    for (int i =0;i< rooms.size();i++) {
+      int minX = min.getx();
+      int minY = min.gety();
+      Room curr = rooms.get(i);
+      Position upperLeft = curr.getUpperLeft();
+      int upperX = upperLeft.getx();
+      int upperY = upperLeft.gety();
+      if (minX== 0 && minY == 0) {
+        min = upperLeft;
+        upperLeftIndex = i;
+      } else if (minX >upperX && minY>upperY) {
+        min = upperLeft;
+        upperLeftIndex = i;
+      } else if (upperX ==0 && upperY ==0) {
+        min = upperLeft;
+        upperLeftIndex =i;
+      }
+    }
+    Room upperLeftRoom = rooms.get(upperLeftIndex);
+    ArrayList<Position> unoccupiedTiles = upperLeftRoom.getTiles();
+    Position temp = unoccupiedTiles.get(0);
 
-  public static void main(String[] args) throws JSONException {
+    return temp;
+  }
+
+
+  //To return an unoccupied position in the right-most room
+  public Position findUnoccupiedRightmost(int id) {
+    Position min = new Position();
+    int bottomRightIndex = -1;
+    for (int i =0;i< rooms.size();i++) {
+      int minX = min.getx();
+      int minY = min.gety();
+      Room curr = rooms.get(i);
+      Position rightBottom = curr.getRightBottom();
+      int bottomX = rightBottom.getx() +curr.getWidth();
+      int bottomY = rightBottom.gety() +curr.getHeight();
+      if (minX== 0 && minY == 0) {
+        min = rightBottom;
+        bottomRightIndex = i;
+      } else if (minX <bottomX && minY<bottomY) {
+        min = rightBottom;
+        bottomRightIndex = i;
+      }
+    }
+    Room bottomRightRoom = rooms.get(bottomRightIndex);
+    ArrayList<Position> unoccupiedTiles = bottomRightRoom .getTiles();
+    Position temp = unoccupiedTiles.get(0);
+
+    return temp;
+  }
+
+
+  public void UpdateLevel(Position p, int id) {
+    this.levelLayout.put(p,id);
+  }
+
+  /* public static void main(String[] args) throws JSONException {
     //Scanner sc = new Scanner(System.in);
     //String exampleString = sc.nextLine();
     //Here is where the level date gets computed. To change to another exmaple input, just change the argument of JsonParser.readString().
     JsonParser.readString(exampleString2);
     finalLevel = JsonParser.getCompletelevel();
     finalLevel.print2D();
-  }
+  }*/
 
 
 }
