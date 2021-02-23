@@ -280,6 +280,13 @@ public class Level {
     this.fill2DArray();
   }
 
+  //For testing purposes
+  public void putTestKeyAndExit(Position p1, Position p2) {
+    this.levelLayout.put(p1, 7);
+    this.levelLayout.put(p2, 8);
+
+  }
+
   public HashMap<Position,Integer> getLevelLayout() {
     return this.levelLayout;
   }
@@ -403,7 +410,7 @@ public class Level {
 
   //To return an unoccupied position in the left-most room
   public Position findUnoccupiedLeftmost(int id) {
-    Position min = new Position();
+    Position min = new Position(-1 ,-1);
     int upperLeftIndex = -1;
     for (int i =0;i< rooms.size();i++) {
       int minX = min.getx();
@@ -412,20 +419,19 @@ public class Level {
       Position upperLeft = curr.getUpperLeft();
       int upperX = upperLeft.getx();
       int upperY = upperLeft.gety();
-      if (minX== 0 && minY == 0) {
+      if (minX== -1 && minY == -1) {
         min = upperLeft;
         upperLeftIndex = i;
-      } else if (minX >upperX && minY>upperY) {
+      } else if (minX > upperX && minY > upperY) {
         min = upperLeft;
         upperLeftIndex = i;
-      } else if (upperX ==0 && upperY ==0) {
-        min = upperLeft;
-        upperLeftIndex =i;
       }
     }
+
+
     Room upperLeftRoom = rooms.get(upperLeftIndex);
     ArrayList<Position> unoccupiedTiles = upperLeftRoom.getTiles();
-    Position temp = unoccupiedTiles.get(0);
+    Position temp = unoccupiedTiles.get(id - 10);
 
     return temp;
   }
@@ -433,7 +439,7 @@ public class Level {
 
   //To return an unoccupied position in the right-most room
   public Position findUnoccupiedRightmost(int id) {
-    Position min = new Position();
+    Position min = new Position(-1, -1);
     int bottomRightIndex = -1;
     for (int i =0;i< rooms.size();i++) {
       int minX = min.getx();
@@ -442,7 +448,7 @@ public class Level {
       Position rightBottom = curr.getRightBottom();
       int bottomX = rightBottom.getx() +curr.getWidth();
       int bottomY = rightBottom.gety() +curr.getHeight();
-      if (minX== 0 && minY == 0) {
+      if (minX== -1 && minY == -1) {
         min = rightBottom;
         bottomRightIndex = i;
       } else if (minX <bottomX && minY<bottomY) {
@@ -451,8 +457,8 @@ public class Level {
       }
     }
     Room bottomRightRoom = rooms.get(bottomRightIndex);
-    ArrayList<Position> unoccupiedTiles = bottomRightRoom .getTiles();
-    Position temp = unoccupiedTiles.get(0);
+    ArrayList<Position> unoccupiedTiles = bottomRightRoom.getTiles();
+    Position temp = unoccupiedTiles.get(100 - id);
 
     return temp;
   }

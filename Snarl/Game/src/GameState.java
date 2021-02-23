@@ -7,6 +7,8 @@ public class GameState {
     ArrayList<Adversary> adversaries = new ArrayList<>();
     ArrayList<Integer> adversaryIDs = new ArrayList<>();
     ArrayList<Position> playerPositions=  new ArrayList<>();
+    ArrayList<Position> adversaryPositions=  new ArrayList<>();
+
     boolean playerArrived;
 
 
@@ -24,15 +26,51 @@ public class GameState {
 
     }
 
-    //intermidate game state
-    GameState(HashMap<Integer, Position> playerPositons, HashMap<Integer, Position> adversaryPositions, boolean exitStatus) {
+    //intermediate game state
+    GameState(HashMap<Integer, Position> playerPositons, HashMap<Integer,
+        Position> adversaryPositions, boolean exitStatus, GameState prevGameState) {
+        this.l = prevGameState.getL();
+        this.players = prevGameState.getPlayers();
+        this.adversaries = prevGameState.getAdversaries();
         for (Integer id: playerPositons.keySet()) {
-            l.UpdateLevel(playerPositons.get(id), id);
+            Player curr = players.get(id);
+            curr.setPosition(playerPositons.get(id));
         }
         for (Integer id: adversaryPositions.keySet()) {
-            l.UpdateLevel(adversaryPositions.get(id),id);
+            Adversary curr = adversaries.get(id);
+            curr.setPosition(adversaryPositions.get(id));
         }
         l.setExitStatus(exitStatus);
+    }
+
+    public Player getPlayer(int index) {
+        if(index >= players.size() || index < 0) {
+            throw new IllegalArgumentException("Not a valid index!");
+        }
+        return this.players.get(index);
+    }
+
+    public boolean getPlayerArrived() {
+        return playerArrived;
+    }
+
+    public Level getL() {
+        return l;
+    }
+
+    public ArrayList<Player> getPlayers() {
+        return players;
+    }
+
+    public ArrayList<Adversary> getAdversaries() {
+        return adversaries;
+    }
+
+    public Adversary getAdversary(int index) {
+        if(index >= adversaries.size() || index < 0) {
+            throw new IllegalArgumentException("Not a valid index!");
+        }
+        return this.adversaries.get(index);
     }
 
 
@@ -41,7 +79,8 @@ public class GameState {
         for (int i =0; i< playerNumber; i++) {
             Player curr = new Player(i);
             players.add(curr);
-            l.findUnoccupiedLeftmost(curr.getId());
+            Position p = l.findUnoccupiedLeftmost(curr.getId());
+            curr.setPosition(p);
         }
     }
 
@@ -50,15 +89,21 @@ public class GameState {
         for (int i =0; i< adNumber; i++) {
             Adversary curr = new Adversary(i);
             adversaries.add(curr);
-            l.findUnoccupiedRightmost(curr.getId());
+            Position p = l.findUnoccupiedRightmost(curr.getId());
+            curr.setPosition(p);
             adversaryIDs.add(curr.getId());
         }
     }
 
     //Modify the game state after a player moves
-    public void updatePlayerState(int id, Position newP) {
-        Player curr = players.get(id -10);
+    public void updatePlayerState(int index, Position newP) {
+        Player curr = players.get(index);
         curr.setPosition(newP);
+        for(int i = 0; i < adversaries.size(); i++) {
+            Adversary temp = adversaries.get(i);
+            Position position = temp.getP();
+            adversaryPositions.add(position);
+        }
         //if the player interacts with a key
         if (l.getLevelLayout().get(newP) == 7) {
             l.setExitStatus(true);
@@ -67,9 +112,8 @@ public class GameState {
         else if (l.getLevelLayout().get(newP) == 8) {
             //call the rule checker to determine if the level has ended
             playerArrived = l.getExitStatus();
-
-            } else if (adversaryIDs.contains(l.getLevelLayout().get(newP))) {
-            //kill the player
+        }
+        if(adversaryPositions.contains(newP)) {
             players.remove(curr);
         }
 
@@ -77,9 +121,9 @@ public class GameState {
     }
 
     //Modify the game state after an adversary moves
-    public void updateAdversaryState(int id, Position newP) {
+    public void updateAdversaryState(int index, Position newP) {
         playerPositions = new ArrayList<>();
-        Adversary curr = adversaries.get(100-id);
+        Adversary curr = adversaries.get(index);
         curr.setPosition(newP);
         for (int i =0;i<players.size();i++) {
             Player temp  =players.get(i);

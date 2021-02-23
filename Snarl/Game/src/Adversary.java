@@ -13,4 +13,8 @@ public class Adversary {
     public void setPosition(Position p) {
         this.p = p;
     }
+
+    public Position getP() {
+        return this.p;
+    }
 }

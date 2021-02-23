@@ -32,6 +32,9 @@ public class Room {
   }
 
   private boolean doorsValid(ArrayList<Position> doorList) {
+    if(doorList.size() == 0) {
+      throw new IllegalArgumentException("Given no doors!");
+    }
     for (int i = 0; i < doorList.size(); i++) {
       Position curr = doorList.get(i);
       System.out.println(roomLayout.get(curr) + " TETS");
