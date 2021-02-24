@@ -30,6 +30,7 @@ public class GameStateTests {
   HashMap<Integer, Position> playerPos = new HashMap<>();
   HashMap<Integer, Position> adversaryPos = new HashMap<>();
   GameState intermediate;
+
   void init() {
     tiles.add(tileOne);
     tiles.add(tileTwo);
@@ -50,6 +51,8 @@ public class GameStateTests {
     adversaryPos.put(2, tileOne);
     level.putTestKeyAndExit(tileTwo, tileThree);
     intermediate = new GameState(playerPos, adversaryPos, false, initial);
+    int[][] out = initial.out;
+    initial.render(11, 99);
 
 
   }
@@ -106,8 +109,6 @@ public class GameStateTests {
     Adversary temp = intermediate.getAdversary(1);
     intermediate.updateAdversaryState(1, tileFour);
     assertEquals(intermediate.getPlayers().contains(curr), false);
-
-
   }
 
 }

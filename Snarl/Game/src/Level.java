@@ -14,7 +14,7 @@ public class Level {
   Position exit;
   static Level finalLevel;
   //use 2d array to print
-  static int[][] ascii = new int[30][30];
+  int[][] ascii = new int[30][30];
   //an example of level data
 
   boolean exitStatus;
@@ -340,8 +340,6 @@ public class Level {
     if (key != null && exit != null) {
       putKeyandExit();
     }
-
-
   }
 
   public void setExitStatus(boolean exitStatus) {
@@ -363,23 +361,26 @@ public class Level {
   }
 
 
-  public static void print2D()
+  public void print2D(int[][] array)
   {
-
     String original = "";
     String formatted = "";
-    for (int[] row : ascii) {
+    for (int[] row : array) {
       original = Arrays.toString(row);
       int size = original.length();
       formatted = original.substring(1, size - 2);
       char[] chars= formatted.toCharArray();
       for(int i =0; i<chars.length;i++) {
         char temp = chars[i];
-        //0 means nothing
-        if (temp == '0') {
+        //3 means a player
+        if (temp == '3') {
+          chars[i] = 'p';
+          //0 means nothing
+        } else if (temp == '0') {
           chars[i] = ' ';
-          //1 is wall tile
-        } else if (temp == '1') {
+        }
+        //1 means wall tile
+        else if (temp == '1') {
           chars[i] = '*';
           //2 is non-wall tile
         } else if (temp == '2') {
@@ -399,7 +400,10 @@ public class Level {
           //8 is an exit
         } else if (temp == '8') {
           chars[i] = 'e';
-        } else if (chars[i] == ',') {
+        } else if (temp == '9') {
+          chars[i] = 'A';
+        }
+        else if (chars[i] == ',') {
           chars[i] = (char) 0;
         }
       }
@@ -466,6 +470,10 @@ public class Level {
 
   public void UpdateLevel(Position p, int id) {
     this.levelLayout.put(p,id);
+  }
+
+  public int[][] get2Darray() {
+    return this.ascii;
   }
 
   /* public static void main(String[] args) throws JSONException {

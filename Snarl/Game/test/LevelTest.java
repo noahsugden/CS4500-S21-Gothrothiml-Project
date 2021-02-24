@@ -67,7 +67,7 @@ public class LevelTest {
         assertEquals(5, HorizInt);
         assertEquals(6, VertInt);
 
-        valid.print2D();
+        //valid.print2D();
 
     }
 }

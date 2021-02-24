@@ -37,7 +37,6 @@ public class Room {
     }
     for (int i = 0; i < doorList.size(); i++) {
       Position curr = doorList.get(i);
-      System.out.println(roomLayout.get(curr) + " TETS");
       if(roomLayout.get(curr) == null) {
         System.out.println("Invalid door x is: " + curr.getx() + " Y is: " + curr.gety());
         return false;

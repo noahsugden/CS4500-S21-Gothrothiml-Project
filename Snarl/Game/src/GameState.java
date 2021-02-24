@@ -5,9 +5,12 @@ public class GameState {
     Level l;
     ArrayList<Player> players = new ArrayList<>();
     ArrayList<Adversary> adversaries = new ArrayList<>();
-    ArrayList<Integer> adversaryIDs = new ArrayList<>();
+    HashMap<Integer, Adversary> adversaryIDs = new HashMap<>();
+    HashMap<Integer, Player> playerIDs = new HashMap<>();
     ArrayList<Position> playerPositions=  new ArrayList<>();
     ArrayList<Position> adversaryPositions=  new ArrayList<>();
+    int[][] out;
+
 
     boolean playerArrived;
 
@@ -81,6 +84,7 @@ public class GameState {
             players.add(curr);
             Position p = l.findUnoccupiedLeftmost(curr.getId());
             curr.setPosition(p);
+            playerIDs.put(curr.getId(), curr);
         }
     }
 
@@ -91,7 +95,7 @@ public class GameState {
             adversaries.add(curr);
             Position p = l.findUnoccupiedRightmost(curr.getId());
             curr.setPosition(p);
-            adversaryIDs.add(curr.getId());
+            adversaryIDs.put(curr.getId(), curr);
         }
     }
 
@@ -122,18 +126,44 @@ public class GameState {
 
     //Modify the game state after an adversary moves
     public void updateAdversaryState(int index, Position newP) {
+        HashMap<Position, Player> playerHashMap = new HashMap<>();
         playerPositions = new ArrayList<>();
         Adversary curr = adversaries.get(index);
         curr.setPosition(newP);
-        for (int i =0;i<players.size();i++) {
+        for (int i =0; i<players.size(); i++) {
             Player temp  =players.get(i);
+            playerHashMap.put(temp.getP(), temp);
           playerPositions.add(temp.getP());
+        }
+        if(playerHashMap.get(newP) != null) {
+            players.remove(playerHashMap.get(newP));
+        }
+    }
 
+    public void render(int pID, int aID) {
+        out = l.get2Darray();
+        if(playerIDs.containsKey(pID)) {
+            Player curr = playerIDs.get(pID);
+            Position temp = curr.getP();
+            int x = temp.getx();
+            int y = temp.gety();
+            out[y][x] = 3;
         }
-        if (playerPositions.contains(newP)) {
-            //kill the player
-            players.remove(curr);
+        else {
+            throw new IllegalArgumentException("Invalid player ID given!");
         }
+        if(adversaryIDs.containsKey(aID)) {
+            Adversary curr = adversaryIDs.get(aID);
+            Position temp = curr.getP();
+            int x = temp.getx();
+            int y = temp.gety();
+            out[y][x] = 9;
+        }
+        else {
+            throw new IllegalArgumentException("Invalid adversary ID given!");
+        }
+        l.print2D(out);
+
     }
 
 }
