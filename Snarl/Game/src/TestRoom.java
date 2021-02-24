@@ -18,7 +18,7 @@ public class TestRoom {
     System.out.println(finalArray.toString());
   }
 
-  public static Room readRoomObject(JSONObject room) {
+  public static Room readRoomObject(JSONObject room) throws JSONException {
     ArrayList<Position> nonWallTiles = new ArrayList<>();
     ArrayList<Position> doors = new ArrayList<>();
     JSONArray originArray = room.getJSONArray("origin");
@@ -128,8 +128,14 @@ public class TestRoom {
 
   }
 
-  public static void main(String[] args) {
-    String input = args[0];
+  public static void main(String[] args) throws JSONException {
+   Scanner sc = new Scanner(System.in);
+   StringBuilder sb = new StringBuilder();
+   while (sc.hasNextLine()){
+     String curr = sc.nextLine();
+     sb.append(curr);
+    }
+   String input = sb.toString();
     readString(input);
 
   }
