@@ -29,21 +29,24 @@ public class TestRoom {
     int rows = bounds.getInt("rows");
     int columns = bounds.getInt("columns");
     JSONArray layout = room.getJSONArray("layout");
-    for (int i = 0; i < layout.length(); i++) {
+    for (int i = 0; i < rows; i++) {
       JSONArray curr = layout.getJSONArray(i);
-      for (int j = 0; j < curr.length(); j++) {
+      for (int j = 0; j < columns; j++) {
         int temp = curr.getInt(j);
         if (temp == 1) {
-          Position tile = new Position(j + x, i + y);
+          Position tile = new Position(i + x, j + y);
           nonWallTiles.add(tile);
         } else if (temp == 2) {
-          Position door = new Position(j + x, i + y);
+          Position door = new Position(i + x, j + y);
           doors.add(door);
         }
 
       }
     }
-    Room jsonRoom = new Room(origin, columns, rows, nonWallTiles, doors);
+    Room jsonRoom = new Room(origin, rows, columns, nonWallTiles, doors);
+//    for (int i = 0; i < doors.size(); i++) {
+//      doors.get(i).print();
+//    }
     return jsonRoom;
   }
 
@@ -56,32 +59,32 @@ public class TestRoom {
     int x = startPoint.getx();
     int y = startPoint.gety();
     Position origin = room.getUpperLeft();
-    int upperBound = origin.gety();
-    int leftBound = origin.getx();
-    int rightBound = origin.getx() + room.getWidth() - 1;
-    int lowerBound = origin.gety() + room.getHeight() - 1;
-    if (y - 1 >= upperBound) {
-      Position up = new Position(x, y - 1);
+    int upperBound = origin.getx();
+    int leftBound = origin.gety();
+    int rightBound = origin.gety() + room.getWidth() - 1;
+    int lowerBound = origin.getx() + room.getHeight() - 1;
+    if (x - 1 >= upperBound) {
+      Position up = new Position(x - 1, y);
       if (roomLayout.get(up) == 2 || roomLayout.get(up) == 4) {
         result.add(up);
       }
     }
-    if (x - 1 >= leftBound) {
-      Position left = new Position(x - 1, y);
+    if (y - 1 >= leftBound) {
+      Position left = new Position(x, y - 1);
       if (roomLayout.get(left) == 2 || roomLayout.get(left) == 4) {
         result.add(left);
       }
     }
 
-    if (x + 1 <= rightBound) {
-      Position right = new Position(x + 1, y);
+    if (y + 1 <= rightBound) {
+      Position right = new Position(x, y + 1);
       if (roomLayout.get(right) == 2 || roomLayout.get(right) == 4) {
         result.add(right);
       }
     }
 
-    if (y + 1 <= lowerBound) {
-      Position lower = new Position(x, y + 1);
+    if (x + 1 <= lowerBound) {
+      Position lower = new Position(x + 1, y);
       if (roomLayout.get(lower) == 2 || roomLayout.get(lower) == 4) {
         result.add(lower);
       }
@@ -129,13 +132,24 @@ public class TestRoom {
   }
 
   public static void main(String[] args) throws JSONException {
-   Scanner sc = new Scanner(System.in);
-   StringBuilder sb = new StringBuilder();
-   while (sc.hasNextLine()){
-     String curr = sc.nextLine();
-     sb.append(curr);
-    }
-   String input = sb.toString();
+//   Scanner sc = new Scanner(System.in);
+//   StringBuilder sb = new StringBuilder();
+//   while (sc.hasNextLine()){
+//     String curr = sc.nextLine();
+//     sb.append(curr);
+//    }
+//   String input = sb.toString();
+    String input = "[ { \"type\" : \"room\",\n" +
+            "    \"origin\" : [0, 1],\n" +
+            "    \"bounds\" : { \"rows\" : 3,\n" +
+            "                 \"columns\" : 5 },\n" +
+            "    \"layout\" : [ [0, 0, 2, 0, 0],\n" +
+            "                 [0, 1, 1, 1, 0],\n" +
+            "                 [0, 0, 2, 0, 0]\n" +
+            "               ]\n" +
+            "  },\n" +
+            "  [5, 4]\n" +
+            "]";
     readString(input);
 
   }
