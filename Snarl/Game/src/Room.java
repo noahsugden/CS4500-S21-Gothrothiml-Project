@@ -7,7 +7,7 @@ public class Room {
   int width;
   int height;
   ArrayList<Position> tiles;
-  ArrayList<Position> doors;
+  static ArrayList<Position> doors;
   // mapped to: 1 if wall tile, 2 if non-wall tile, 3 if boundary, 4 if door
   HashMap<Position, Integer> roomLayout = new HashMap<>();
 
@@ -37,6 +37,7 @@ public class Room {
     }
     for (int i = 0; i < doorList.size(); i++) {
       Position curr = doorList.get(i);
+      System.out.println(roomLayout.get(curr));
       if(roomLayout.get(curr) == null) {
         System.out.println("Invalid door x is: " + curr.getx() + " Y is: " + curr.gety());
         return false;
@@ -49,6 +50,10 @@ public class Room {
     }
 
     return true;
+  }
+
+  public static ArrayList<Position> getDoors() {
+    return doors;
   }
 
   public Position getUpperLeft() {

@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Level {
-  ArrayList<Room> rooms;
-  ArrayList<Hallway> hallways;
+  static ArrayList<Room> rooms;
+  static ArrayList<Hallway> hallways;
   //value 7 for key, value 8 for exit
   HashMap<Position, Integer> levelLayout = new HashMap<>();
   Position key;
@@ -303,6 +303,14 @@ public class Level {
     }
   }
 
+  public static ArrayList<Hallway> getHallways() {
+    return hallways;
+  }
+
+  public static ArrayList<Room> getRooms() {
+    return rooms;
+  }
+
   private void putLevelLayout() {
     for(int i = 0; i < rooms.size(); i++) {
       Room curr = rooms.get(i);
@@ -323,6 +331,10 @@ public class Level {
 
       //To check if a Hallway starts and ends with a door
       if(levelLayout.get(curr.getInit()) != 4 || levelLayout.get(curr.getEnd()) != 4) {
+        curr.getInit().print();
+        curr.getEnd().print();
+        System.out.println(levelLayout.get(curr.getInit()));
+        System.out.println(levelLayout.get(curr.getEnd()));
         throw new IllegalArgumentException("Hallway should start and end with a door!");
       }
       for(Position p: temp.keySet()) {
