@@ -9,6 +9,9 @@ public class GameState {
     HashMap<Integer, Player> playerIDs = new HashMap<>();
     ArrayList<Position> playerPositions=  new ArrayList<>();
     ArrayList<Position> adversaryPositions=  new ArrayList<>();
+    HashMap<String, Position> playerPositionsMap = new HashMap<>();
+    HashMap<String, Position> zombiePositionsMap = new HashMap<>();
+    HashMap<String, Position> ghostPositionsMap = new HashMap<>();
     int[][] out;
 
 
@@ -45,6 +48,18 @@ public class GameState {
         }
         l.setExitStatus(exitStatus);
     }
+
+    GameState(HashMap<String, Position> playerPositions, HashMap<String, Position> zombiePositions,
+        HashMap<String, Position> ghostPositions, boolean exitStatus, Level l) {
+        this.l = l;
+        this.playerPositionsMap = playerPositions;
+        this.zombiePositionsMap = zombiePositions;
+        this.ghostPositionsMap = ghostPositions;
+        l.setExitStatus(exitStatus);
+
+
+    }
+
 
     public Player getPlayer(int index) {
         if(index >= players.size() || index < 0) {

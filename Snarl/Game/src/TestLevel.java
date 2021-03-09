@@ -11,10 +11,8 @@ public class TestLevel {
   static ArrayList<Room> roomList = new ArrayList<>();
   static ArrayList<Hallway> hallwayList = new ArrayList<>();
 
-  public static JSONObject readLevel(String json) throws JSONException {
-    JSONArray command = new JSONArray(json);
 
-    JSONObject level = command.getJSONObject(0);
+  public static Level getLevel(JSONObject level) throws JSONException{
     JSONArray rooms = level.getJSONArray("rooms");
     for (int i = 0; i < rooms.length(); i++) {
       Room curr = TestRoom.readRoomObject(rooms.getJSONObject(i));
@@ -32,11 +30,19 @@ public class TestLevel {
       Hallway curr = readHallwayObject(hallways.getJSONObject(i));
       hallwayList.add(curr);
     }
-    JSONArray inputPos = command.getJSONArray(1);
-    Position input = new Position(inputPos.getInt(0), inputPos.getInt(1));
+
 
     Level l = new Level(roomList, hallwayList, keyPosition, exitPosition);
 
+    return l;
+  }
+  public static JSONObject readLevel(String json) throws JSONException {
+    JSONArray command = new JSONArray(json);
+
+    JSONObject level = command.getJSONObject(0);
+    Level l = getLevel(level);
+    JSONArray inputPos = command.getJSONArray(1);
+    Position input = new Position(inputPos.getInt(0), inputPos.getInt(1));
     JSONObject result = output(l, input);
     return result;
   }
