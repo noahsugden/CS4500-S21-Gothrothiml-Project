@@ -1,19 +1,22 @@
 import com.google.gson.JsonArray;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-public class TestState {
-Level currentLevel;
-HashMap<String, Position> playerPositions = new HashMap<>();
-HashMap<String, Position> zombiePositions = new HashMap<>();
-HashMap<String, Position> ghostPositions = new HashMap<>();
-GameState gameState;
-boolean exitStatus;
-JSONObject state;
 
-  void readJsonState(String s) throws JSONException{
+public class TestState {
+  static Level currentLevel;
+  static HashMap<String, Position> playerPositions = new HashMap<>();
+  static HashMap<String, Position> zombiePositions = new HashMap<>();
+  static HashMap<String, Position> ghostPositions = new HashMap<>();
+  static GameState gameState;
+  static boolean exitStatus;
+  static JSONObject state;
+
+  static void readJsonState(String s) throws JSONException {
     JSONArray input = new JSONArray(s);
     state = input.getJSONObject(0);
     JSONObject level = state.getJSONObject("level");
@@ -28,13 +31,15 @@ JSONObject state;
     int x = position.getInt(0);
     int y = position.getInt(1);
     Position pos = new Position(x, y);
-    gameState = new GameState(playerPositions,  zombiePositions,
-        ghostPositions, exitStatus, currentLevel);
+    gameState = new GameState(playerPositions, zombiePositions,
+            ghostPositions, exitStatus, currentLevel);
+    System.out.println(output(gameState, name, pos).toString());
+
   }
 
-  void readPositions(JSONArray positions) throws JSONException {
+  static void readPositions(JSONArray positions) throws JSONException {
     HashMap<String, Position> temp = new HashMap<>();
-    for(int i = 0; i < positions.length(); i++) {
+    for (int i = 0; i < positions.length(); i++) {
       JSONObject curr = positions.getJSONObject(i);
       String type = curr.getString("type");
       String name = curr.getString("name");
@@ -42,22 +47,20 @@ JSONObject state;
       int x = currPosition.getInt(0);
       int y = currPosition.getInt(1);
       Position position = new Position(x, y);
-      if(type.equals("player")) {
+      if (type.equals("player")) {
         playerPositions.put(name, position);
-      }
-      else if(type.equals("zombie")) {
+      } else if (type.equals("zombie")) {
         zombiePositions.put(name, position);
-      }
-      else if(type.equals("ghost")) {
+      } else if (type.equals("ghost")) {
         ghostPositions.put(name, position);
       }
     }
   }
 
-  JSONArray output(GameState gs, String name, Position pos) {
+  static JSONArray output(GameState gs, String name, Position pos) throws JSONException {
     JSONArray result = new JSONArray();
     //Invalid player name input
-    if(!playerPositions.containsKey(name)) {
+    if (!playerPositions.containsKey(name)) {
       result.put("Failure");
       result.put("Player");
       result.put(name);
@@ -68,8 +71,8 @@ JSONObject state;
     int tileType = levelLayout.get(pos);
 
     //Destination is non-traversable
-    if(tileType != 2 && tileType != 4 && tileType != 5 && tileType != 6 && tileType != 7
-        && tileType != 8) {
+    if (tileType != 2 && tileType != 4 && tileType != 5 && tileType != 6 && tileType != 7
+            && tileType != 8) {
       result.put("Failure");
       result.put("The destination position ");
       JSONArray position = new JSONArray();
@@ -80,7 +83,7 @@ JSONObject state;
       return result;
     }
     //For when player exits
-    if(tileType == 8 && !exitStatus) {
+    if (tileType == 8 && !exitStatus) {
       result.put("Success");
       result.put("Player ");
       result.put(name);
@@ -91,7 +94,7 @@ JSONObject state;
     }
 
     //If destination has adversary
-    if(zombiePositions.containsValue(pos) || ghostPositions.containsValue(pos)) {
+    if (zombiePositions.containsValue(pos) || ghostPositions.containsValue(pos)) {
       result.put("Success");
       result.put("Player ");
       result.put(name);
@@ -107,29 +110,28 @@ JSONObject state;
     result.put(newState);
 
 
-
     return result;
   }
 
-  JSONObject modifyState(String name, Position p, JSONObject prev, boolean removePlayer) {
+  static JSONObject modifyState(String name, Position p, JSONObject prev, boolean removePlayer) throws JSONException {
     prev.remove("players");
 
     JSONArray players = new JSONArray();
-    for(String s : playerPositions.keySet()) {
-      JSONObject curr =  new JSONObject();
+    for (String s : playerPositions.keySet()) {
+      JSONObject curr = new JSONObject();
       curr.put("type", "player");
-      curr.put("name", name);
+      curr.put("name", s);
 
-      if(s.equals(name)) {
-        if(!removePlayer) {
+      if (s.equals(name)) {
+        if (!removePlayer) {
           JSONArray temp = new JSONArray();
           temp.put(p.getx());
           temp.put(p.gety());
           curr.put("position", temp);
+        } else {
+          continue;
         }
-      }
-
-      else {
+      } else {
         JSONArray temp = new JSONArray();
         Position currPosition = playerPositions.get(s);
         temp.put(currPosition.getx());
@@ -142,5 +144,77 @@ JSONObject state;
     prev.put("players", players);
 
     return prev;
+  }
+
+  public static void main(String[] args) throws JSONException {
+//   Scanner sc = new Scanner(System.in);
+//   StringBuilder sb = new StringBuilder();
+//   while (sc.hasNextLine()){
+//     String curr = sc.nextLine();
+//     sb.append(curr);
+//    }
+//   String input = sb.toString();
+    String input = "[\n" +
+            "  {\n" +
+            "    \"type\": \"state\",\n" +
+            "    \"level\":\n" +
+            "    { \"type\": \"level\",\n" +
+            "      \"rooms\": [ { \"type\": \"room\",\n" +
+            "        \"origin\": [ 0, 0 ],\n" +
+            "        \"bounds\": { \"rows\": 5, \"columns\": 5 },\n" +
+            "        \"layout\": [ [ 0, 0, 2, 0, 0 ],\n" +
+            "          [ 0, 1, 1, 0, 0 ],\n" +
+            "          [ 0, 1, 1, 0, 2 ],\n" +
+            "          [ 0, 1, 0, 1, 0 ],\n" +
+            "          [ 0, 0, 0, 0, 0 ]] },\n" +
+            "        { \"type\": \"room\",\n" +
+            "          \"origin\": [ 8, 9 ],\n" +
+            "          \"bounds\": { \"rows\": 4, \"columns\": 3 },\n" +
+            "          \"layout\": [ [ 0, 0, 1 ],\n" +
+            "            [ 0, 1, 1 ],\n" +
+            "            [ 2, 1, 1 ],\n" +
+            "            [ 0, 1, 2 ]] },\n" +
+            "        { \"type\": \"room\",\n" +
+            "          \"origin\": [ 2, 16 ],\n" +
+            "          \"bounds\": { \"rows\": 4, \"columns\": 4 },\n" +
+            "          \"layout\": [ [ 0, 0, 2, 0 ],\n" +
+            "            [ 0, 1, 1, 1 ],\n" +
+            "            [ 0, 1, 1, 2 ],\n" +
+            "            [ 0, 1, 1, 1 ]] } ],\n" +
+            "      \"objects\": [ { \"type\": \"key\", \"position\": [ 2, 2 ] },\n" +
+            "        { \"type\": \"exit\", \"position\": [ 5, 17 ] } ],\n" +
+            "      \"hallways\": [ { \"type\": \"hallway\",\n" +
+            "        \"from\": [ 2, 4 ],\n" +
+            "        \"to\": [ 10, 9 ],\n" +
+            "        \"waypoints\": [ [2, 5], [ 10, 5 ]] },\n" +
+            "        { \"type\": \"hallway\",\n" +
+            "          \"from\": [ 11, 11 ],\n" +
+            "          \"to\": [ 4, 19 ],\n" +
+            "          \"waypoints\": [ [ 11, 20 ], [ 4, 20 ]] } ]\n" +
+            "    },\n" +
+            "    \"players\": [{\n" +
+            "      \"type\": \"player\",\n" +
+            "      \"name\": \"noah\",\n" +
+            "      \"position\": [1, 1]\n" +
+            "    },\n" +
+            "      {\n" +
+            "        \"type\": \"player\",\n" +
+            "        \"name\": \"benjamin\",\n" +
+            "        \"position\": [3, 17]\n" +
+            "      }],\n" +
+            "    \"adversaries\": [\n" +
+            "      {\n" +
+            "        \"type\": \"ghost\",\n" +
+            "        \"name\": \"ghost\",\n" +
+            "        \"position\": [3, 18]\n" +
+            "      }\n" +
+            "    ],\n" +
+            "    \"exit-locked\": true\n" +
+            "  },\n" +
+            "  \"benjamin\",\n" +
+            "  [5, 17]\n" +
+            "]";
+    readJsonState(input);
+
   }
 }

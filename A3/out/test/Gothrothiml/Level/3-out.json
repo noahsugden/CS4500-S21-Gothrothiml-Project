@@ -1,0 +1,6 @@
+{
+  "traversable": true,
+  "object": null,
+  "type": "hallway",
+  "reachable": [[8, 9], [2, 16]]
+}
