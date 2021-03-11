@@ -1,4 +1,3 @@
-import com.google.gson.JsonArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +71,7 @@ public class TestState {
 
     //Destination is non-traversable
     if (tileType != 2 && tileType != 4 && tileType != 5 && tileType != 6 && tileType != 7
-            && tileType != 8) {
+            && tileType != 8 || playerPositions.containsValue(pos)) {
       result.put("Failure");
       result.put("The destination position ");
       JSONArray position = new JSONArray();
@@ -154,7 +153,8 @@ public class TestState {
 //     sb.append(curr);
 //    }
 //   String input = sb.toString();
-    String input = "[\n" +
+    String input = "\n" +
+            "[\n" +
             "  {\n" +
             "    \"type\": \"state\",\n" +
             "    \"level\":\n" +
@@ -211,8 +211,8 @@ public class TestState {
             "    ],\n" +
             "    \"exit-locked\": true\n" +
             "  },\n" +
-            "  \"benjamin\",\n" +
-            "  [5, 17]\n" +
+            "  \"noah\",\n" +
+            "  [3, 17]\n" +
             "]";
     readJsonState(input);
 
