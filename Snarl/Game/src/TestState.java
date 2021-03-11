@@ -14,11 +14,12 @@ public class TestState {
   static GameState gameState;
   static boolean exitStatus;
   static JSONObject state;
+  static JSONObject level;
 
   static void readJsonState(String s) throws JSONException {
     JSONArray input = new JSONArray(s);
     state = input.getJSONObject(0);
-    JSONObject level = state.getJSONObject("level");
+    level = state.getJSONObject("level");
     currentLevel = TestLevel.getLevel(level);
     JSONArray players = state.getJSONArray("players");
     readPositions(players);
@@ -87,7 +88,7 @@ public class TestState {
       result.put("Player ");
       result.put(name);
       result.put(" exited.");
-      JSONObject newState = modifyState(name, pos, state, true);
+      JSONObject newState = modifyState(name, pos, state, true, false);
       result.put(newState);
       return result;
     }
@@ -98,13 +99,21 @@ public class TestState {
       result.put("Player ");
       result.put(name);
       result.put(" was ejected.");
-      JSONObject newState = modifyState(name, pos, state, true);
+      JSONObject newState = modifyState(name, pos, state, true, false);
+      result.put(newState);
+      return result;
+    }
+
+    //If destination contains a key
+    if (tileType == 7) {
+      JSONObject newState = modifyState(name, pos, state, false, true);
+      result.put("Success");
       result.put(newState);
       return result;
     }
     //If the given player exists in the input state, can be moved to the given position, and
     //the position is not occupied by an exit or an adversary
-    JSONObject newState = modifyState(name, pos, state, false);
+    JSONObject newState = modifyState(name, pos, state, false, false);
     result.put("Success");
     result.put(newState);
 
@@ -112,7 +121,7 @@ public class TestState {
     return result;
   }
 
-  static JSONObject modifyState(String name, Position p, JSONObject prev, boolean removePlayer) throws JSONException {
+  static JSONObject modifyState(String name, Position p, JSONObject prev, boolean removePlayer, boolean removeKey) throws JSONException {
     prev.remove("players");
 
     JSONArray players = new JSONArray();
@@ -142,6 +151,21 @@ public class TestState {
     }
     prev.put("players", players);
 
+    if (removeKey) {
+      JSONArray objects = level.getJSONArray("objects");
+      objects.remove(0);
+      level.remove("objects");
+      level.put("objects", objects);
+
+      prev.remove("exit-locked");
+      prev.remove("level");
+      prev.put("exit-locked", false);
+      prev.put("level", level);
+      return prev;
+
+
+
+    }
     return prev;
   }
 
@@ -212,7 +236,7 @@ public class TestState {
             "    \"exit-locked\": true\n" +
             "  },\n" +
             "  \"noah\",\n" +
-            "  [3, 17]\n" +
+            "  [2, 2]\n" +
             "]";
     readJsonState(input);
 
