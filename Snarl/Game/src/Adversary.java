@@ -1,6 +1,7 @@
 public class Adversary {
     int id;
     Position p ;
+    int cardinalMoves;
 
     Adversary(int id) {
         this.id = 100-id;
@@ -17,4 +18,6 @@ public class Adversary {
     public Position getP() {
         return this.p;
     }
+
+    public int getCardinalMoves() {return cardinalMoves;}
 }

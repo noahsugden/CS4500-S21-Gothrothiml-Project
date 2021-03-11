@@ -1,9 +1,11 @@
+import javafx.geometry.Pos;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GameState {
     Level l;
-    ArrayList<Player> players = new ArrayList<>();
+    static ArrayList<Player> players = new ArrayList<>();
     ArrayList<Adversary> adversaries = new ArrayList<>();
     HashMap<Integer, Adversary> adversaryIDs = new HashMap<>();
     HashMap<Integer, Player> playerIDs = new HashMap<>();
@@ -12,9 +14,12 @@ public class GameState {
     HashMap<String, Position> playerPositionsMap = new HashMap<>();
     HashMap<String, Position> zombiePositionsMap = new HashMap<>();
     HashMap<String, Position> ghostPositionsMap = new HashMap<>();
+    HashMap<Integer,Position> playerIDPositions = new HashMap<>();
+    HashMap<Integer,Position> adversaryIDPositions = new HashMap<>();
     int[][] out;
 
 
+    boolean exitStatus;
     boolean playerArrived;
 
 
@@ -30,36 +35,47 @@ public class GameState {
         createPlayers(playerNumber);
         createAdversaries(adversaryNumber);
 
+        playerPositions = playerPositionArrayList(players);
+        adversaryPositions = adversaryPositionArrayList(adversaries);
+        exitStatus = false;
     }
 
     //intermediate game state
-    GameState(HashMap<Integer, Position> playerPositons, HashMap<Integer,
-        Position> adversaryPositions, boolean exitStatus, GameState prevGameState) {
+    GameState(HashMap<Integer, Position> playerPositonMap, HashMap<Integer,
+        Position> adversaryPositionMap, boolean exitStatus, GameState prevGameState) {
         this.l = prevGameState.getL();
         this.players = prevGameState.getPlayers();
         this.adversaries = prevGameState.getAdversaries();
-        for (Integer id: playerPositons.keySet()) {
+        for (Integer id: playerPositonMap.keySet()) {
             Player curr = players.get(id);
-            curr.setPosition(playerPositons.get(id));
+            curr.setPosition(playerPositonMap.get(id));
         }
-        for (Integer id: adversaryPositions.keySet()) {
+        for (Integer id:adversaryPositionMap.keySet()) {
             Adversary curr = adversaries.get(id);
-            curr.setPosition(adversaryPositions.get(id));
+            curr.setPosition(adversaryPositionMap.get(id));
         }
-        l.setExitStatus(exitStatus);
+        this.exitStatus = exitStatus;
+        playerPositions = playerPositionArrayList(players);
+        adversaryPositions = adversaryPositionArrayList(adversaries);
     }
 
-    GameState(HashMap<String, Position> playerPositions, HashMap<String, Position> zombiePositions,
+    GameState(HashMap<String, Position> playerPositionsMap, HashMap<String, Position> zombiePositions,
         HashMap<String, Position> ghostPositions, boolean exitStatus, Level l) {
         this.l = l;
-        this.playerPositionsMap = playerPositions;
+        this.playerPositionsMap = playerPositionsMap;
         this.zombiePositionsMap = zombiePositions;
         this.ghostPositionsMap = ghostPositions;
-        l.setExitStatus(exitStatus);
+        this.exitStatus = exitStatus;
+        playerPositions = playerPositionArrayList(players);
+        zombiePositions.putAll(ghostPositions);
+        adversaryPositions.addAll(zombiePositions.values());
 
 
     }
 
+    public static void ejectPlayer(Player player) {
+        players.remove(player);
+    }
 
     public Player getPlayer(int index) {
         if(index >= players.size() || index < 0) {
@@ -68,8 +84,24 @@ public class GameState {
         return this.players.get(index);
     }
 
+    public HashMap<String, Position> getPlayerPositionsMap() {
+        return playerPositionsMap;
+    }
+
+    public void setExitStatus(boolean exitStatus) {
+        this.exitStatus = exitStatus;
+    }
+
     public boolean getPlayerArrived() {
         return playerArrived;
+    }
+
+    public ArrayList<Position> getPlayerPositions() {
+        return playerPositions;
+    }
+
+    public ArrayList<Position> getAdversaryPositions() {
+        return adversaryPositions;
     }
 
     public Level getL() {
@@ -84,6 +116,14 @@ public class GameState {
         return adversaries;
     }
 
+    public HashMap<Integer, Position> getPlayerIDPositions() {
+        return playerIDPositions;
+    }
+
+    public HashMap<Integer, Position> getAdversaryIDPositions() {
+        return adversaryIDPositions;
+    }
+
     public Adversary getAdversary(int index) {
         if(index >= adversaries.size() || index < 0) {
             throw new IllegalArgumentException("Not a valid index!");
@@ -91,6 +131,23 @@ public class GameState {
         return this.adversaries.get(index);
     }
 
+    public ArrayList<Position> playerPositionArrayList(ArrayList<Player> players) {
+        ArrayList<Position> results = new ArrayList<>();
+        for (int i =0 ;i<players.size();i++) {
+            Position curr = players.get((i)).getP();
+            results.add(curr);
+        }
+        return results;
+    }
+
+    public ArrayList<Position> adversaryPositionArrayList(ArrayList<Adversary> adversaries) {
+        ArrayList<Position> results = new ArrayList<>();
+        for (int i =0 ;i<adversaries.size();i++) {
+            Position curr = adversaries.get((i)).getP();
+            results.add(curr);
+        }
+        return results;
+    }
 
     //create the playerList
     public void createPlayers(int playerNumber) {
@@ -100,6 +157,7 @@ public class GameState {
             Position p = l.findUnoccupiedLeftmost(curr.getId());
             curr.setPosition(p);
             playerIDs.put(curr.getId(), curr);
+            playerIDPositions.put(curr.getId(),p);
         }
     }
 
@@ -111,6 +169,7 @@ public class GameState {
             Position p = l.findUnoccupiedRightmost(curr.getId());
             curr.setPosition(p);
             adversaryIDs.put(curr.getId(), curr);
+            adversaryIDPositions.put(curr.getId(), p);
         }
     }
 
@@ -125,12 +184,12 @@ public class GameState {
         }
         //if the player interacts with a key
         if (l.getLevelLayout().get(newP) == 7) {
-            l.setExitStatus(true);
+            exitStatus = true;
 
         } // if the player interacts with an exit
         else if (l.getLevelLayout().get(newP) == 8) {
             //call the rule checker to determine if the level has ended
-            playerArrived = l.getExitStatus();
+            playerArrived = exitStatus;
         }
         if(adversaryPositions.contains(newP)) {
             players.remove(curr);

@@ -17,6 +17,7 @@ public class Level {
   int[][] ascii = new int[30][30];
   //an example of level data
 
+    //true for unlocked
   boolean exitStatus;
 
 
