@@ -1,6 +1,7 @@
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -170,85 +171,14 @@ public class TestState {
   }
 
   public static void main(String[] args) throws JSONException {
-//   Scanner sc = new Scanner(System.in);
-//   StringBuilder sb = new StringBuilder();
-//   while (sc.hasNextLine()){
-//     String curr = sc.nextLine();
-//     sb.append(curr);
-//    }
-//   String input = sb.toString();
-    String input = "[\n" +
-            "  {\n" +
-            "    \"exit-locked\": false,\n" +
-            "    \"players\": [\n" +
-            "      { \"name\": \"ferd\", \"type\": \"player\", \"position\": [ 4, 3 ] },\n" +
-            "      { \"name\": \"joe\", \"type\": \"player\", \"position\": [ 12, 8 ] }\n" +
-            "    ],\n" +
-            "    \"type\": \"state\",\n" +
-            "    \"adversaries\": [\n" +
-            "      { \"name\": \"zombie1\", \"type\": \"zombie\", \"position\": [ 7, 15 ] }\n" +
-            "    ],\n" +
-            "    \"level\": {\n" +
-            "      \"type\" : \"level\",\n" +
-            "      \"rooms\": [\n" +
-            "        {\n" +
-            "          \"origin\": [ 10, 5 ],\n" +
-            "          \"layout\": [\n" +
-            "            [ 0, 0, 0, 0, 0 ],\n" +
-            "            [ 0, 1, 1, 1, 0 ],\n" +
-            "            [ 2, 1, 1, 1, 0 ],\n" +
-            "            [ 0, 1, 1, 1, 0 ],\n" +
-            "            [ 0, 0, 0, 0, 0 ]\n" +
-            "          ],\n" +
-            "          \"type\": \"room\",\n" +
-            "          \"bounds\": { \"rows\": 5, \"columns\": 5 }\n" +
-            "        },\n" +
-            "        {\n" +
-            "          \"origin\": [ 4, 14 ],\n" +
-            "          \"layout\": [\n" +
-            "            [ 0, 0, 2, 0, 0 ],\n" +
-            "            [ 0, 1, 1, 1, 0 ],\n" +
-            "            [ 0, 1, 1, 1, 0 ],\n" +
-            "            [ 0, 1, 1, 1, 0 ],\n" +
-            "            [ 0, 0, 0, 0, 0 ]\n" +
-            "          ],\n" +
-            "          \"type\": \"room\",\n" +
-            "          \"bounds\": { \"rows\": 5, \"columns\": 5 }\n" +
-            "        },\n" +
-            "        {\n" +
-            "          \"origin\": [ 3, 1 ],\n" +
-            "          \"layout\": [\n" +
-            "            [ 0, 0, 2, 0 ],\n" +
-            "            [ 0, 1, 1, 0 ],\n" +
-            "            [ 0, 1, 1, 0 ],\n" +
-            "            [ 0, 2, 0, 0 ]\n" +
-            "          ],\n" +
-            "          \"type\": \"room\",\n" +
-            "          \"bounds\": { \"rows\": 4, \"columns\": 4 }\n" +
-            "        }\n" +
-            "      ],\n" +
-            "      \"objects\": [\n" +
-            "        { \"type\": \"exit\", \"position\": [ 7, 17 ] }\n" +
-            "      ],\n" +
-            "      \"hallways\": [\n" +
-            "        {\n" +
-            "          \"waypoints\": [ [ 1, 3 ], [ 1, 16 ] ],\n" +
-            "          \"to\": [ 4, 16 ],\n" +
-            "          \"from\": [ 3, 3 ],\n" +
-            "          \"type\": \"hallway\"\n" +
-            "        },\n" +
-            "        {\n" +
-            "          \"waypoints\": [ [ 12, 2 ] ],\n" +
-            "          \"to\": [ 12, 5 ], \n" +
-            "          \"from\": [ 6, 2 ],\n" +
-            "          \"type\": \"hallway\"\n" +
-            "        }\n" +
-            "      ]\n" +
-            "    }\n" +
-            "  },\n" +
-            "  \"ferd\",\n" +
-            "  [ 7, 15 ]\n" +
-            "]\n";
+  Scanner sc = new Scanner(System.in);
+  StringBuilder sb = new StringBuilder();
+ while (sc.hasNextLine()){
+    String curr = sc.nextLine();
+    sb.append(curr);
+   }
+  String input = sb.toString();
+
     readJsonState(input);
 
   }
