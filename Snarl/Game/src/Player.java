@@ -9,6 +9,10 @@ public class Player {
         this.id = id +10;
     }
 
+    public Player(Position p) {
+        this.p = p;
+    }
+
     public int getId() {
         return this.id;
     }

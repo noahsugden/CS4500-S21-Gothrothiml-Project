@@ -4,8 +4,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+// Unit tests for our GameManager are pointless at this point, since it is very likely that it will
+// change. Once we incorporate networking, we will implement the unit tests.
 public class GameManager {
-
 
     ArrayList<String> playerUsernames;
     ArrayList<String> adversaryUsernames;

@@ -1,4 +1,4 @@
-import javafx.geometry.Pos;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,14 +6,14 @@ import java.util.HashMap;
 public class RuleChecker {
     static Level l;
     static HashMap<Position, Integer> levellayout;
-    RuleChecker(Level l) {
-        this.l = l;
-        this.levellayout = l.getLevelLayout();
+    RuleChecker(Level level) {
+        l = level;
+        levellayout = level.getLevelLayout();
     }
 
     //To determine the interaction between the player and the object on the destination tile
 //The method will return different integers for different cases. For example, 0 for key event,1 for locked exit event,
-//2 for unlocked exit event, 3 for adversary event, 4 for an empty tile, 5 for another player.
+//2 for unlocked exit event, 3 for adversary event, 4 for an empty tile.
     static int determinePlayerInteraction(Player player,
                                           HashMap<Integer, Position> adversaryPositions, HashMap<Integer, Position> playerPositions, Boolean exitStatus) {
         Position curr = player.getP();
@@ -72,29 +72,41 @@ public class RuleChecker {
         ArrayList<Position> adversaryPositions = gameState.getAdversaryPositions();
         for (int i =0;i<playerPositions.size() ;i++) {
             Position curr = playerPositions.get(i);
-            if(validTile(curr)) {
-                System.out.print(curr.getx() + " "+curr.gety() + "causes invalid game state" );
+            if(!validTile(curr)) {
+                System.out.print(curr.getx() + " "+curr.gety() + " causes invalid game state" );
                 return false;
             }
-            playerPositions.remove(curr);
-            if(playerPositions.contains(curr)) {
+            if(checkDuplicates(curr, playerPositions)) {
                 System.out.print("duplicate players on " + curr.getx() + " "+curr.gety());
                 return false;
             }
         }
         for (int i =0;i<adversaryPositions.size() ;i++) {
             Position curr = adversaryPositions.get(i);
-            if(validTile(curr)) {
+            if(!validTile(curr)) {
                 System.out.print(curr.getx() + " "+curr.gety() + "causes invalid game state" );
                 return false;
             }
             adversaryPositions.remove(curr);
-            if(adversaryPositions.contains(curr)) {
+            if(checkDuplicates(curr, adversaryPositions)) {
                 System.out.print("duplicate adversaries on " + curr.getx() + " "+curr.gety());
                 return false;
             }
         }
+
         return true;
+    }
+
+    public boolean checkDuplicates(Position pos, ArrayList<Position> positionArrayList) {
+        int counter = 0;
+        for (int i = 0; i < positionArrayList.size(); i++) {
+//            pos.print();
+//            positionArrayList.get(i).print();
+            if(pos.equals(positionArrayList.get(i))) {
+                counter++;
+            }
+        }
+        return counter > 1;
     }
 
    public static boolean isValidPlayerMove(Position pos, Player player, HashMap<Integer, Position> playerPositons) {
@@ -115,10 +127,15 @@ public class RuleChecker {
         ArrayList<Position> possiblePositions = new ArrayList<>();
         possiblePositions.add(pos);
         ArrayList<Position> firstCardinal = calculate1Cardinal(pos);
+        possiblePositions.addAll(firstCardinal);
         for (int i =0;i< firstCardinal.size();i++) {
             ArrayList<Position> temp;
             temp = calculate1Cardinal(firstCardinal.get(i));
-            possiblePositions.addAll(temp);
+            if(!possiblePositions.containsAll(temp)) {
+                possiblePositions.addAll(temp);
+            }
+
+
         }
         return possiblePositions;
     }
@@ -142,19 +159,19 @@ public class RuleChecker {
 
     }
 
-    static ArrayList<Position> calculate1Cardinal(Position pos) {
+    public static ArrayList<Position> calculate1Cardinal(Position pos) {
         ArrayList<Position> results = new ArrayList<>();
         int x = pos.getx();
         int y = pos.gety();
         //upper position
-        if (y>1) {
+        if (y>=1) {
             Position temp = new Position(x, y-1);
             if (validTile(temp)) {
                 results.add(temp);
             }
         }
         //left position
-        if (x>1) {
+        if (x>=1) {
             Position temp = new Position(x-1,y);
             if (validTile(temp)) {
                 results.add(temp);
@@ -173,7 +190,10 @@ public class RuleChecker {
         return results;
     }
 
-    static Boolean validTile(Position pos) {
+    public static Boolean validTile(Position pos) {
+        if(levellayout.get(pos) == null) {
+            return false;
+        }
         int tileType = levellayout.get(pos);
         return (tileType == 2 || tileType == 4 || tileType == 5 || tileType == 6 || tileType == 7
                 || tileType == 8);

@@ -6,6 +6,10 @@ public class Adversary {
     Adversary(int id) {
         this.id = 100-id;
     }
+    public Adversary(Position p, int cardinalMoves ) {
+        this.p = p;
+        this.cardinalMoves = cardinalMoves;
+    }
 
     public int getId() {
         return id;

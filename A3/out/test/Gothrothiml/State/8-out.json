@@ -1,6 +1,5 @@
-[
-  {
-    "type": "state",
+[ "Success",
+  {"type": "state",
     "level":
     { "type": "level",
       "rooms": [ { "type": "room",
@@ -39,12 +38,12 @@
     "players": [{
       "type": "player",
       "name": "noah",
-      "position": [1, 1]
+      "position": [2, 2]
     },
       {
         "type": "player",
         "name": "benjamin",
-        "position": [3, 17]
+        "position": [5, 17]
       }],
     "adversaries": [
       {
@@ -54,7 +53,4 @@
       }
     ],
     "exit-locked": false
-  },
-  "benjamin",
-  [5, 17]
-]
+  } ]

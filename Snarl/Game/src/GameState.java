@@ -1,4 +1,4 @@
-import javafx.geometry.Pos;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,11 +66,19 @@ public class GameState {
         this.zombiePositionsMap = zombiePositions;
         this.ghostPositionsMap = ghostPositions;
         this.exitStatus = exitStatus;
-        playerPositions = playerPositionArrayList(players);
+        playerPositions = fromMapToArrayList(playerPositionsMap);
         zombiePositions.putAll(ghostPositions);
         adversaryPositions.addAll(zombiePositions.values());
 
 
+    }
+
+    public ArrayList<Position> fromMapToArrayList(HashMap<String, Position> hashMap) {
+        ArrayList<Position> results = new ArrayList<>();
+        for(Position p : hashMap.values()) {
+            results.add(p);
+        }
+        return results;
     }
 
     public static void ejectPlayer(Player player) {
