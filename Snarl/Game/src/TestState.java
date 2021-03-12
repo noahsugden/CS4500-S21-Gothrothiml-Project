@@ -177,67 +177,78 @@ public class TestState {
 //     sb.append(curr);
 //    }
 //   String input = sb.toString();
-    String input = "\n" +
-            "[\n" +
+    String input = "[\n" +
             "  {\n" +
-            "    \"type\": \"state\",\n" +
-            "    \"level\":\n" +
-            "    { \"type\": \"level\",\n" +
-            "      \"rooms\": [ { \"type\": \"room\",\n" +
-            "        \"origin\": [ 0, 0 ],\n" +
-            "        \"bounds\": { \"rows\": 5, \"columns\": 5 },\n" +
-            "        \"layout\": [ [ 0, 0, 2, 0, 0 ],\n" +
-            "          [ 0, 1, 1, 0, 0 ],\n" +
-            "          [ 0, 1, 1, 0, 2 ],\n" +
-            "          [ 0, 1, 0, 1, 0 ],\n" +
-            "          [ 0, 0, 0, 0, 0 ]] },\n" +
-            "        { \"type\": \"room\",\n" +
-            "          \"origin\": [ 8, 9 ],\n" +
-            "          \"bounds\": { \"rows\": 4, \"columns\": 3 },\n" +
-            "          \"layout\": [ [ 0, 0, 1 ],\n" +
-            "            [ 0, 1, 1 ],\n" +
-            "            [ 2, 1, 1 ],\n" +
-            "            [ 0, 1, 2 ]] },\n" +
-            "        { \"type\": \"room\",\n" +
-            "          \"origin\": [ 2, 16 ],\n" +
-            "          \"bounds\": { \"rows\": 4, \"columns\": 4 },\n" +
-            "          \"layout\": [ [ 0, 0, 2, 0 ],\n" +
-            "            [ 0, 1, 1, 1 ],\n" +
-            "            [ 0, 1, 1, 2 ],\n" +
-            "            [ 0, 1, 1, 1 ]] } ],\n" +
-            "      \"objects\": [ { \"type\": \"key\", \"position\": [ 2, 2 ] },\n" +
-            "        { \"type\": \"exit\", \"position\": [ 5, 17 ] } ],\n" +
-            "      \"hallways\": [ { \"type\": \"hallway\",\n" +
-            "        \"from\": [ 2, 4 ],\n" +
-            "        \"to\": [ 10, 9 ],\n" +
-            "        \"waypoints\": [ [2, 5], [ 10, 5 ]] },\n" +
-            "        { \"type\": \"hallway\",\n" +
-            "          \"from\": [ 11, 11 ],\n" +
-            "          \"to\": [ 4, 19 ],\n" +
-            "          \"waypoints\": [ [ 11, 20 ], [ 4, 20 ]] } ]\n" +
-            "    },\n" +
-            "    \"players\": [{\n" +
-            "      \"type\": \"player\",\n" +
-            "      \"name\": \"noah\",\n" +
-            "      \"position\": [1, 1]\n" +
-            "    },\n" +
-            "      {\n" +
-            "        \"type\": \"player\",\n" +
-            "        \"name\": \"benjamin\",\n" +
-            "        \"position\": [3, 17]\n" +
-            "      }],\n" +
-            "    \"adversaries\": [\n" +
-            "      {\n" +
-            "        \"type\": \"ghost\",\n" +
-            "        \"name\": \"ghost\",\n" +
-            "        \"position\": [3, 18]\n" +
-            "      }\n" +
+            "    \"exit-locked\": false,\n" +
+            "    \"players\": [\n" +
+            "      { \"name\": \"ferd\", \"type\": \"player\", \"position\": [ 4, 3 ] },\n" +
+            "      { \"name\": \"joe\", \"type\": \"player\", \"position\": [ 12, 8 ] }\n" +
             "    ],\n" +
-            "    \"exit-locked\": true\n" +
+            "    \"type\": \"state\",\n" +
+            "    \"adversaries\": [\n" +
+            "      { \"name\": \"zombie1\", \"type\": \"zombie\", \"position\": [ 7, 15 ] }\n" +
+            "    ],\n" +
+            "    \"level\": {\n" +
+            "      \"type\" : \"level\",\n" +
+            "      \"rooms\": [\n" +
+            "        {\n" +
+            "          \"origin\": [ 10, 5 ],\n" +
+            "          \"layout\": [\n" +
+            "            [ 0, 0, 0, 0, 0 ],\n" +
+            "            [ 0, 1, 1, 1, 0 ],\n" +
+            "            [ 2, 1, 1, 1, 0 ],\n" +
+            "            [ 0, 1, 1, 1, 0 ],\n" +
+            "            [ 0, 0, 0, 0, 0 ]\n" +
+            "          ],\n" +
+            "          \"type\": \"room\",\n" +
+            "          \"bounds\": { \"rows\": 5, \"columns\": 5 }\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"origin\": [ 4, 14 ],\n" +
+            "          \"layout\": [\n" +
+            "            [ 0, 0, 2, 0, 0 ],\n" +
+            "            [ 0, 1, 1, 1, 0 ],\n" +
+            "            [ 0, 1, 1, 1, 0 ],\n" +
+            "            [ 0, 1, 1, 1, 0 ],\n" +
+            "            [ 0, 0, 0, 0, 0 ]\n" +
+            "          ],\n" +
+            "          \"type\": \"room\",\n" +
+            "          \"bounds\": { \"rows\": 5, \"columns\": 5 }\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"origin\": [ 3, 1 ],\n" +
+            "          \"layout\": [\n" +
+            "            [ 0, 0, 2, 0 ],\n" +
+            "            [ 0, 1, 1, 0 ],\n" +
+            "            [ 0, 1, 1, 0 ],\n" +
+            "            [ 0, 2, 0, 0 ]\n" +
+            "          ],\n" +
+            "          \"type\": \"room\",\n" +
+            "          \"bounds\": { \"rows\": 4, \"columns\": 4 }\n" +
+            "        }\n" +
+            "      ],\n" +
+            "      \"objects\": [\n" +
+            "        { \"type\": \"exit\", \"position\": [ 7, 17 ] }\n" +
+            "      ],\n" +
+            "      \"hallways\": [\n" +
+            "        {\n" +
+            "          \"waypoints\": [ [ 1, 3 ], [ 1, 16 ] ],\n" +
+            "          \"to\": [ 4, 16 ],\n" +
+            "          \"from\": [ 3, 3 ],\n" +
+            "          \"type\": \"hallway\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"waypoints\": [ [ 12, 2 ] ],\n" +
+            "          \"to\": [ 12, 5 ], \n" +
+            "          \"from\": [ 6, 2 ],\n" +
+            "          \"type\": \"hallway\"\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }\n" +
             "  },\n" +
-            "  \"noah\",\n" +
-            "  [2, 2]\n" +
-            "]";
+            "  \"ferd\",\n" +
+            "  [ 7, 15 ]\n" +
+            "]\n";
     readJsonState(input);
 
   }

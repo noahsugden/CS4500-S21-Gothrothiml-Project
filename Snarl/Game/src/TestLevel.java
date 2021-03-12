@@ -13,16 +13,35 @@ public class TestLevel {
 
 
   public static Level getLevel(JSONObject level) throws JSONException{
+    JSONObject key = new JSONObject();
+    JSONObject exit;
+    JSONObject temp;
+    Position keyPosition = new Position(-1, -1);
     JSONArray rooms = level.getJSONArray("rooms");
     for (int i = 0; i < rooms.length(); i++) {
       Room curr = TestRoom.readRoomObject(rooms.getJSONObject(i));
       roomList.add(curr);
     }
     JSONArray objects = level.getJSONArray("objects");
-    JSONObject key = objects.getJSONObject(0);
-    JSONObject exit = objects.getJSONObject(1);
-    JSONArray keyPos = key.getJSONArray("position");
-    Position keyPosition = new Position(keyPos.getInt(0), keyPos.getInt(1));
+    if(objects.length() ==1) {
+      exit = objects.getJSONObject(0);
+    } else {
+      temp = objects.getJSONObject(0);
+      if (temp.keys().next().equals("exit")) {
+        exit = temp;
+        key = objects.getJSONObject(1);
+        JSONArray keyPos = key.getJSONArray("position");
+        keyPosition = new Position(keyPos.getInt(0), keyPos.getInt(1));
+
+      } else {
+        key = temp;
+        exit = objects.getJSONObject(1);
+        JSONArray keyPos = key.getJSONArray("position");
+        keyPosition = new Position(keyPos.getInt(0), keyPos.getInt(1));
+
+      }
+    }
+
     JSONArray exitPos = exit.getJSONArray("position");
     Position exitPosition = new Position(exitPos.getInt(0), exitPos.getInt(1));
     JSONArray hallways = level.getJSONArray("hallways");

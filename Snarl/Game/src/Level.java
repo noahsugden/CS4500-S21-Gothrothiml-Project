@@ -254,7 +254,9 @@ public class Level {
   public Level(ArrayList<Room> r, ArrayList<Hallway> h, Position k, Position e) {
     this.rooms = r;
     this.hallways = h;
-    this.key = k;
+    if (k.gety() !=-1 && k.getx() !=-1) {
+      this.key = k;
+    }
     this.exit = e;
     this.putLevelLayout();
     this.fill2DArray();
