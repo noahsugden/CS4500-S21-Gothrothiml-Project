@@ -3,17 +3,34 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * This class represents a RuleChecker that will be used by the Game Manager to determine the
+ * validity of the game.
+ * It contains the current level and a Hashmap of Position to Integer representing the level layout.
+ */
 public class RuleChecker {
     static Level l;
     static HashMap<Position, Integer> levellayout;
-    RuleChecker(Level level) {
+
+    /**
+     * Constructor for a RuleChecker.
+     * @param level represents the current level.
+     *              the levellayout of the given level is used to initialize this levellayout
+     */
+    public RuleChecker(Level level) {
         l = level;
         levellayout = level.getLevelLayout();
     }
 
-    //To determine the interaction between the player and the object on the destination tile
-//The method will return different integers for different cases. For example, 0 for key event,1 for locked exit event,
-//2 for unlocked exit event, 3 for adversary event, 4 for an empty tile.
+    /**
+     * Determines the interaction between the given Player and the object on the destination tile.
+     * @param player represents the given Player
+     * @param adversaryPositions represents a Hashmap of Adversary ID's to their Positions
+     * @param playerPositions represents a Hashmap of Player ID's to their Positions
+     * @param exitStatus represents a boolean determining the current exitStatus
+     * @return different integers for different cases; 0 for key event, 1 for locked exit event,
+     *         2 for unlocked exit event, 3 for adversary event, 4 for an empty tile
+     */
     static int determinePlayerInteraction(Player player,
                                           HashMap<Integer, Position> adversaryPositions, HashMap<Integer, Position> playerPositions, Boolean exitStatus) {
         Position curr = player.getP();
@@ -33,7 +50,14 @@ public class RuleChecker {
         }
     }
 
-    //1 represents the adversary kills a player, and 0 represents the tile is empty and there is no interaction
+    /**
+     * Determines the interaction between the given Adversary and the object on the destination tile.
+     * @param adversary represents the given Adversary
+     * @param adversaryPositions represents a Hashmap of Adversary ID's to their Positions
+     * @param playerPositions represents a Hashmap of Player ID's to their Positions
+     * @return an int representing the result; 1 represents the adversary kills a player,
+     *         and 0 represents the tile is empty and there is no interaction
+     */
     int determineAdversaryInteraction(Adversary adversary, HashMap< Integer, Position> adversaryPositions,
                                       HashMap< Integer, Position> playerPositions) {
         Position curr = adversary.getP();
@@ -49,6 +73,16 @@ public class RuleChecker {
     //playerArrived is a boolean that is saved in gamestate, and it will be 0 if any player has arrived the level exit
 //while the exit has been unlocked, 1 if the the level is not end, 2 if the level has ended and the current level is the
 //final level, 3 if all players are expelled
+
+    /**
+     * Determines if the level has ended and the current circumstances of the game.
+     * @param playerArrived represents if a player has arrived at the exit
+     * @param isFinalLevel represents if this level is the final level
+     * @param players represents an ArrayList of the active Players
+     * @return an int representing the result; 0 if any player has arrived the level exit while the
+     *         exit has been unlocked, 1 if the the level is not end, 2 if the level has ended and
+     *         the current level is the final level, 3 if all players are expelled
+     */
     int isLevelEnd(boolean playerArrived, boolean isFinalLevel, ArrayList<Player> players) {
         boolean exitStatus = l.getExitStatus();
         if (playerArrived && exitStatus) {
@@ -63,10 +97,21 @@ public class RuleChecker {
         return -1;
     }
 
+    /**
+     * Checks if all players have been expelled from the current level.
+     * @param players represents an ArrayList of the active Players
+     * @return a boolean representing if all of the players have been expelled
+     */
     boolean allPlayersExpelled(ArrayList<Player> players) {
         return players.size() ==0;
     }
 
+    /**
+     * Checks if the game state is valid (no duplicate player or adversary positions and that players
+     * and adversaries are on traversable tiles).
+     * @param gameState represents the current GameState
+     * @return a boolean determining if the given GameState is valid
+     */
     boolean isGameStateValid(GameState gameState) {
         ArrayList<Position> playerPositions = gameState.getPlayerPositions();
         ArrayList<Position> adversaryPositions = gameState.getAdversaryPositions();
@@ -97,6 +142,12 @@ public class RuleChecker {
         return true;
     }
 
+    /**
+     * Helper method for isGameStateValid that checks if there are duplicate player or adversary positions.
+     * @param pos
+     * @param positionArrayList
+     * @return
+     */
     public boolean checkDuplicates(Position pos, ArrayList<Position> positionArrayList) {
         int counter = 0;
         for (int i = 0; i < positionArrayList.size(); i++) {
