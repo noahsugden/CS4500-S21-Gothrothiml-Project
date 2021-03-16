@@ -1,3 +1,6 @@
+// from: http://faculty.washington.edu/moishe/javademos/ch06%20Code/Position.java
+
+
 public class Position
 {
 
@@ -59,5 +62,5 @@ public class Position
 
 }
 
-// from: http://faculty.washington.edu/moishe/javademos/ch06%20Code/Position.java
+
 
