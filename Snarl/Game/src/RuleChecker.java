@@ -144,9 +144,9 @@ public class RuleChecker {
 
     /**
      * Helper method for isGameStateValid that checks if there are duplicate player or adversary positions.
-     * @param pos
-     * @param positionArrayList
-     * @return
+     * @param pos represents a given position
+     * @param positionArrayList represents an arraylist of positions
+     * @return a boolean determining if there are duplicate positions in the given arraylist
      */
     public boolean checkDuplicates(Position pos, ArrayList<Position> positionArrayList) {
         int counter = 0;
@@ -160,6 +160,15 @@ public class RuleChecker {
         return counter > 1;
     }
 
+    /**
+     * Checks if a player's next move is within the 2 cardinal moves range and not overlapped with other
+     * players' positions
+     * @param pos represents the player's next destination
+     * @param player represents the given player
+     * @param playerPositons represents an array list of current player positions
+     * @return a boolean determining the player's next move is within the 2 cardinal moves range and not overlapped
+     * with other players' positions
+     */
    public static boolean isValidPlayerMove(Position pos, Player player, HashMap<Integer, Position> playerPositons) {
         Position curr = player.getP();
         ArrayList<Position> possiblePositions = new ArrayList<>();
@@ -174,6 +183,11 @@ public class RuleChecker {
 
     }
 
+    /**
+     * Calculate tiles that are visible to a player
+     * @param pos represents the player's current position
+     * @return an array list of positions representing the visible tiles
+     */
     public static ArrayList<Position> calculatePlayerVisibleTiles(Position pos) {
         ArrayList<Position> possiblePositions = new ArrayList<>();
         possiblePositions.add(pos);
@@ -191,6 +205,14 @@ public class RuleChecker {
         return possiblePositions;
     }
 
+    /**
+     * Checks if an adversary's next destination is within the 1 cardinal move range and not overlapped with other
+     * adversaries' positions
+     * @param pos represents the adversary's next destination
+     * @param adversary represents the given adversary
+     * @param adversaryPositons represents an array list of positions of the current adversaries
+     * @return a boolean determing if the adversary's next destination is valid
+     */
     boolean isValidAdversaryMove(Position pos, Adversary adversary, HashMap<Integer, Position> adversaryPositons) {
         Position curr = adversary.getP();
         //In case adversaries are modified in the future
@@ -210,6 +232,11 @@ public class RuleChecker {
 
     }
 
+    /**
+     * Calculate tiles that are 1 cardinal move from the current tile
+     * @param pos represents the current position
+     * @return an array list of positions represents the 1 cardinal move tiles
+     */
     public static ArrayList<Position> calculate1Cardinal(Position pos) {
         ArrayList<Position> results = new ArrayList<>();
         int x = pos.getx();
@@ -241,6 +268,11 @@ public class RuleChecker {
         return results;
     }
 
+    /**
+     * Checks if a tile is traversable
+     * @param pos represents the given position
+     * @return a boolean determining if a tile is traversable
+     */
     public static Boolean validTile(Position pos) {
         if(levellayout.get(pos) == null) {
             return false;

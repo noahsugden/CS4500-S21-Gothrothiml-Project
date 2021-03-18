@@ -7,6 +7,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * This class is a test harness executable testState, which, given a state specification and a player with a destination
+ * , will output an updated state or an error message if the player cannot be placed in the destination.
+ */
 public class TestState {
   static Level currentLevel;
   static HashMap<String, Position> playerPositions = new HashMap<>();
@@ -17,6 +21,11 @@ public class TestState {
   static JSONObject state;
   static JSONObject level;
 
+  /**
+   * Reads the json string and prints the result
+   * @param s represents the input json string
+   * @throws JSONException when the json string is not valid
+   */
   static void readJsonState(String s) throws JSONException {
     JSONArray input = new JSONArray(s);
     state = input.getJSONObject(0);
@@ -34,12 +43,16 @@ public class TestState {
     Position pos = new Position(x, y);
     gameState = new GameState(playerPositions, zombiePositions,
             ghostPositions, exitStatus, currentLevel);
-    System.out.println(output(gameState, name, pos).toString());
+    System.out.println(output(name, pos).toString());
 
   }
 
+  /**
+   * Transforms the given json array of positions to a hashmap of string to position
+   * @param positions represents the given json array
+   * @throws JSONException when the json array is not valid
+   */
   static void readPositions(JSONArray positions) throws JSONException {
-    HashMap<String, Position> temp = new HashMap<>();
     for (int i = 0; i < positions.length(); i++) {
       JSONObject curr = positions.getJSONObject(i);
       String type = curr.getString("type");
@@ -58,7 +71,15 @@ public class TestState {
     }
   }
 
-  static JSONArray output(GameState gs, String name, Position pos) throws JSONException {
+  /**
+   * Writes an updated state or an error message in a json array
+   *
+   * @param name represents the player's name
+   * @param pos represents the player's next destination
+   * @return an json array representing the result
+   * @throws JSONException when the name or position is not valid
+   */
+  static JSONArray output(String name, Position pos) throws JSONException {
     JSONArray result = new JSONArray();
     //Invalid player name input
     if (!playerPositions.containsKey(name)) {
@@ -122,7 +143,18 @@ public class TestState {
     return result;
   }
 
-  static JSONObject modifyState(String name, Position p, JSONObject prev, boolean removePlayer, boolean removeKey) throws JSONException {
+  /**
+   * Update the current state based on the result
+   * @param name represents the player's name
+   * @param p represents the player's next destination
+   * @param prev represents the previous game state
+   * @param removePlayer represents if a player should be removed from the previous game state
+   * @param removeKey represents if a key should be removed from the previous game state
+   * @return a json object represents the modified game state
+   * @throws JSONException when the previous game state is not valid
+   */
+  static JSONObject modifyState(String name, Position p, JSONObject prev, boolean removePlayer, boolean removeKey)
+          throws JSONException {
     prev.remove("players");
 
     JSONArray players = new JSONArray();

@@ -6,14 +6,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+/**
+ * The class is a test harness executable testLevel, which, given a level and a point in the level will output information
+ * about
+ * that point:
+ * whether it is traversable;
+ * whether the tile it references contains a key or an exit;
+ * if it is a hallway, the origins of the rooms it connects; and
+ * if it is a room, the origins of neighboring rooms, that is, the rooms that are one hallway removed from the current
+ * room
+ *
+ */
 public class TestLevel {
 
   static ArrayList<Room> roomList = new ArrayList<>();
   static ArrayList<Hallway> hallwayList = new ArrayList<>();
 
 
+  /**
+   * Transforms a json level object to a level
+   * @param level represents the given json object
+   * @return a level
+   * @throws JSONException when the json object is not valid
+   */
   public static Level getLevel(JSONObject level) throws JSONException{
-    JSONObject key = new JSONObject();
+    JSONObject key;
     JSONObject exit;
     JSONObject temp;
     Position keyPosition = new Position(-1, -1);
@@ -55,6 +72,13 @@ public class TestLevel {
 
     return l;
   }
+
+  /**
+   * Transforms a json string to a json level object
+   * @param json represents the given json string
+   * @return a json level object
+   * @throws JSONException when the json string is not valid
+   */
   public static JSONObject readLevel(String json) throws JSONException {
     JSONArray command = new JSONArray(json);
 
@@ -66,6 +90,12 @@ public class TestLevel {
     return result;
   }
 
+  /**
+   * Transforms a json hallway object to a hallway
+   * @param hallway represents the given hallway json object
+   * @return a hallway
+   * @throws JSONException when the given json object is not valid
+   */
   public static Hallway readHallwayObject(JSONObject hallway) throws JSONException {
     JSONArray from = hallway.getJSONArray("from");
     JSONArray to = hallway.getJSONArray("to");
@@ -84,6 +114,13 @@ public class TestLevel {
     return result;
   }
 
+  /**
+   * Writes the result in a json object
+   * @param l represents the given level
+   * @param p represents the given position
+   * @return a json object represents the result
+   * @throws JSONException when the given level or position is not valid
+   */
   public static JSONObject output(Level l, Position p) throws JSONException {
     JSONObject result = new JSONObject();
     HashMap<Position, Integer> levelLayout = l.getLevelLayout();
@@ -133,7 +170,13 @@ public class TestLevel {
     return result;
   }
 
-  public static JSONArray roomReachable(Level l, Position p) throws JSONException {
+  /**
+   * Writes the reachable rooms in a level of a position into a json array
+   * @param l represents the given level
+   * @param p represents the given position
+   * @return a json array of the upper left points of the reachable rooms represents the reachable rooms
+   */
+  public static JSONArray roomReachable(Level l, Position p)  {
     ArrayList<Hallway> hallways = l.getHallways();
     ArrayList<Room> rooms = l.getRooms();
     Room room;
@@ -186,7 +229,13 @@ public class TestLevel {
     return result;
   }
 
-  public static JSONArray hallwayReachable(Level l, Position p) throws JSONException {
+  /**
+   * Determining the origins of the rooms in a level a hallway connects
+   * @param l represents the given level
+   * @param p represents the given position
+   * @return an json array of the reachable rooms
+   */
+  public static JSONArray hallwayReachable(Level l, Position p)  {
     ArrayList<Hallway> hallways = l.getHallways();
     ArrayList<Room> rooms = l.getRooms();
     Hallway hallway;
