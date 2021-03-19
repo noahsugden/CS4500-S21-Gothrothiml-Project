@@ -1,8 +1,8 @@
 # Milestone 6 - Refactoring Report
 
-**Team members:**
+**Team members:Benjamin Lau, Noah Sugden and Bingqing Teng
 
-**Github team/repo:**
+**Github team/repo:Gothrothiml
 
 
 ## Plan
@@ -12,16 +12,16 @@
 
 
 ## Changes
-
-Summarize the work you have performed during this week.
+We updated 14 files with 664 additions and 44 deletions.
+We finished all the commenting in the files in src folder, deleted a few unused functions in the Level class and in the GameState class,and added some constraints in GameManager.
 
 
 ## Future Work
+We still need to refactor rulechecker/gamestate input to use less hashmaps.
+We lost some point in our GameManger design for not checking duplicate usernames, therefore we need to change it in our GameManager class.
 
-Summarize work you'd still like to do if there's time. This can include features 
-you'd like to implement if given time.
 
 
 ## Conclusion
-
-Any concluding remarks.
+In the refactoring process, we didn't aim to change any function; However, as we were writing comments, we found out a few flaws.
+Milestone6 took us about 5 hours in total.
