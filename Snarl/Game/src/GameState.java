@@ -105,6 +105,14 @@ public class GameState {
 
     }
 
+    GameState(Level l, HashMap<String, Position> playerPositionsMap,
+        ArrayList<Position> adversaryPositions) {
+        this.l = l;
+        this.playerPositionsMap = playerPositionsMap;
+        this.adversaryPositions = adversaryPositions;
+
+    }
+
     /**
      * Converts a Hashmap of String to Position into an ArrayList of Positions.
      * @param hashMap represents a mapping of actor names to their positions.
@@ -116,6 +124,10 @@ public class GameState {
             results.add(p);
         }
         return results;
+    }
+
+    public boolean getExitStatus() {
+        return exitStatus;
     }
 
     /**

@@ -309,7 +309,13 @@ public class Level {
     this.fill2DArray();
   }
 
-  //For testing purposes
+  public Position getKey() {
+    return key;
+  }
+
+  public Position getExit() {
+    return exit;
+  }
 
   /**
    * Puts the key and exit at the given positions respectively.

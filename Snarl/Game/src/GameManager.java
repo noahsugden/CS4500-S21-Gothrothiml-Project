@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 // Unit tests for our GameManager are pointless at this point, since it is very likely that it will
 // change. Once we incorporate networking, we will implement the unit tests.
@@ -24,12 +25,26 @@ public class GameManager {
     HashMap<Integer,Position> playerIDpositions;
     HashMap<Integer,Position> adversaryIDpositions;
     boolean levelEnd;
+    int turnNumber;
+    HashMap<Position, Integer> levelLayout;
 
     /**
      * This constructor takes in the current level of the game.
       */
     GameManager(Level l) {
         this.l = l;
+    }
+
+    /**
+     * This constructor is for testing purposes.
+     */
+    GameManager(Level l, ArrayList<Position> adversaryPositions, HashMap<String,
+        Position> playerOrigins) {
+        this.l = l;
+        this.currentGameState = new GameState(l, playerOrigins, adversaryPositions);
+        this.turnNumber = 0;
+        levelLayout = l.getLevelLayout();
+
     }
 
     /**
@@ -132,6 +147,81 @@ public class GameManager {
 
     }
 
+    /**
+     * Gets visible area to the Player in the given Position
+     * @param pos Player position
+     * @return int[][] representing visible area
+     */
+    public int[][] getVisibleArea(Position pos) {
+        int[][] visibleArea = new int[5][5];
+        int posX = pos.getx();
+        int posY = pos.gety();
+        for(int i = posX - 2; i < posX + 3; i++){
+            for(int j = posY - 2; j < posY + 3; j++) {
+                if(i > 0 && j > 0) {
+                    visibleArea[i][j] = levelLayout.get(new Position(i, j));
+                }
+            }
+        }
+        return visibleArea;
+    }
+
+    public HashMap<String, Position> getVisibleObjects(Position pos) {
+        boolean isExitOpen = currentGameState.getExitStatus();
+        HashMap<String, Position> result = new HashMap<>();
+        int posX = pos.getx();
+        int posY = pos.gety();
+        Position exit = l.getExit();
+        if(!isExitOpen) {
+            Position key = l.getKey();
+            int keyX = key.getx();
+            int keyY = key.gety();
+            if(keyX >= posX - 2 && keyX <= posX + 2 && keyY >= posY - 2 && keyY <= posY + 2) {
+                result.put("Key", key);
+            }
+        }
+        int exitX = exit.getx();
+        int exitY = exit.gety();
+        if(exitX >= posX - 2 && exitX <= posX + 2 && exitY >= posY - 2 && exitY <= posY + 2) {
+            result.put("Exit", exit);
+        }
+
+        return result;
+
+    }
+
+    public HashMap<String, Position> getVisibleActors(Position pos) {
+        ArrayList<Position> playerPos = new ArrayList<>();
+        ArrayList<Position> adversaryPos = currentGameState.getAdversaryPositions();
+        HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
+        playerPos.addAll(playerPosMap.values());
+        HashMap<String, Position> result = new HashMap<>();
+        int posX = pos.getx();
+        int posY = pos.gety();
+        //Adds visible players from given Position
+        for(int i = 0; i < playerPos.size(); i++) {
+            int currX = playerPos.get(i).getx();
+            int currY = playerPos.get(i).gety();
+            if(currX >= posX - 2 && currX <= posX + 2 && currY >= posY - 2 && currY <= posY + 2) {
+                String name = "";
+                for(Entry<String, Position> e: playerPosMap.entrySet()) {
+                    if(playerPos.get(i).equals(e.getValue())) {
+                        name = e.getKey();
+                    }
+                }
+                result.put(name, playerPos.get(i));
+            }
+        }
+        //Adds visible adversaries from given Position
+        for(int i = 0; i < adversaryPos.size(); i++) {
+            int currX = adversaryPos.get(i).getx();
+            int currY = adversaryPos.get(i).gety();
+            if(currX >= posX - 2 && currX <= posX + 2 && currY >= posY - 2 && currY <= posY + 2) {
+                result.put("Adversary #" + i, adversaryPos.get(i));
+            }
+        }
+        return result;
+    }
 
 
 
