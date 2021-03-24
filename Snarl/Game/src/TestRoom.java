@@ -3,8 +3,17 @@ import java.util.HashMap;
 import java.util.Scanner;
 import org.json.*;
 
+/**
+ * This class represents the executable that is given a room and a point in the world will output a list of points in the
+ * room 1 cardinal move away that are traversable.
+ */
 public class TestRoom {
 
+  /**
+   * Reads the given json string and prints the result string
+   * @param s represents the json string
+   * @throws JSONException when the json string is not valid
+   */
   public static void readString(String s) throws JSONException {
     JSONArray array = new JSONArray(s);
 
@@ -18,6 +27,12 @@ public class TestRoom {
     System.out.println(finalArray.toString());
   }
 
+  /**
+   * Transforms the json room object to a room
+   * @param room represents the json room object
+   * @return a room
+   * @throws JSONException when the json room object is not valid
+   */
   public static Room readRoomObject(JSONObject room) throws JSONException {
     ArrayList<Position> nonWallTiles = new ArrayList<>();
     ArrayList<Position> doors = new ArrayList<>();
@@ -44,12 +59,15 @@ public class TestRoom {
       }
     }
     Room jsonRoom = new Room(origin, rows, columns, nonWallTiles, doors);
-//    for (int i = 0; i < doors.size(); i++) {
-//      doors.get(i).print();
-//    }
     return jsonRoom;
   }
 
+  /**
+   * Calculates the traversable points around a position in a room
+   * @param room represents the room
+   * @param startPoint represents the start point
+   * @return an arraylist of positions represents the traversable points
+   */
   public static ArrayList<Position> getTraversablePoints(Room room, Position startPoint) {
     HashMap<Position, Integer> roomLayout = room.getRoomLayout();
     ArrayList<Position> result = new ArrayList<>();
@@ -93,6 +111,12 @@ public class TestRoom {
     return result;
   }
 
+  /**
+   * Writes the result of determining if a position is in a room in an json array
+   * @param room represents the given room
+   * @param p represents the given position
+   * @return a json array represents the result
+   */
   public static JSONArray writeOutput(Room room, Position p) {
     JSONArray output = new JSONArray();
     JSONArray origin = new JSONArray();

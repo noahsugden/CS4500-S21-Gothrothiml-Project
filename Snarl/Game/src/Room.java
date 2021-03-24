@@ -1,7 +1,12 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
+/**
+ * This class represents a Room.
+ * It contains the upper-left Position of the Room, the Room's width and height, an ArrayList of
+ * non-wall tile Positions in the Room, an ArrayList of door Positions in the Room, and a Hashmap of
+ * Position to Integer representing the Room layout.
+ */
 public class Room {
   Position upperLeft;
   int width;
@@ -11,6 +16,14 @@ public class Room {
   // mapped to: 1 if wall tile, 2 if non-wall tile, 3 if boundary, 4 if door
   HashMap<Position, Integer> roomLayout = new HashMap<>();
 
+  /**
+   * Constructor for a Room.
+   * @param uL represents the upper-left Position in the Room
+   * @param w represents the width of the Room
+   * @param h represents the height of the Room
+   * @param t represents an ArrayList of non-wall tile Positions in the Room
+   * @param d represents an ArrayList of door Positions in the Room
+   */
   public Room(Position uL, int w, int h, ArrayList<Position> t, ArrayList<Position> d) {
     this.upperLeft = uL;
     this.width = w;
@@ -27,10 +40,19 @@ public class Room {
     this.putWallTiles();
   }
 
+  /**
+   * Gets the Room layout.
+   * @return a Hashmap of Position to Integer representing the layout of the Rooom
+   */
   public HashMap<Position, Integer> getRoomLayout() {
     return this.roomLayout;
   }
 
+  /**
+   * Helper method for the constructor to determine if the given list of door Positions is valid.
+   * @param doorList represents an ArrayList of door Positions in the Room
+   * @return a boolean representing if the given list of door Positions is valid
+   */
   private boolean doorsValid(ArrayList<Position> doorList) {
     if(doorList.size() == 0) {
       throw new IllegalArgumentException("Given no doors!");
@@ -51,14 +73,26 @@ public class Room {
     return true;
   }
 
+  /**
+   * Gets an ArrayList of the door Positions in the Room.
+   * @return an ArrayList of the door Positions in the Room
+   */
   public static ArrayList<Position> getDoors() {
     return doors;
   }
 
+  /**
+   * Gets the upper-left position of the Room.
+   * @return a Position representing the upperLeft Position of the Room
+   */
   public Position getUpperLeft() {
     return upperLeft;
   }
 
+  /**
+   * Gets the right-bottom position of the Room.
+   * @return a Position representing the right-bottom Position of the Room
+   */
   public Position getRightBottom() {
     int x = upperLeft.getx() + width;
     int y = upperLeft.gety() + height;
@@ -66,19 +100,34 @@ public class Room {
     return new Position(x,y);
   }
 
+  /**
+   * Gets an ArrayList of the non-wall tiles in the Room.
+   * @return an ArrayList of the non-wall tiles in the Room
+   */
   public ArrayList<Position> getTiles() {
     return tiles;
   }
 
+  /**
+   * Gets the width of the Room.
+   * @return an int representing the width of the Room
+   */
   public int getWidth() {
     return width;
   }
 
+  /**
+   * Gets the height of the Room.
+   * @return an int representing the height of the Room
+   */
   public int getHeight() {
     return height;
   }
 
 
+  /**
+   * Adds the Room boundaries to the Room layout Hashmap.
+   */
   private void putBoundaries() {
     roomLayout.put(upperLeft, 3);
     //Adds upper part boundary
@@ -111,6 +160,9 @@ public class Room {
 
   }
 
+  /**
+   * Adds the doors to the Room layout Hashmap.
+   */
   private void putDoors() {
     for (int i = 0; i < this.doors.size(); i++) {
       Position curr = this.doors.get(i);
@@ -119,6 +171,9 @@ public class Room {
     }
   }
 
+  /**
+   * Adds the non-wall tiles to the Room layout Hashmap.
+   */
   private void putNonWallTiles() {
     for (int i = 0; i < this.tiles.size(); i++) {
       Position curr = this.tiles.get(i);
@@ -126,6 +181,9 @@ public class Room {
     }
   }
 
+  /**
+   * Adds the wall tiles to the Room layout Hashmap.
+   */
   private void putWallTiles() {
     for (int x = upperLeft.getx(); x < upperLeft.getx() + width; x++) {
       for (int y = upperLeft.gety(); y < upperLeft.gety() + height; y++) {

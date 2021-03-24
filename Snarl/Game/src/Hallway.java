@@ -1,6 +1,11 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * This class represents a Hallway.  It contains two positions representing the doors of the rooms that
+ * it connects, an ArrayList of Positions representing the waypoints (where the hallway switches directions),
+ * and a Hashmap of Position to Integer representing the layout of the hallway.
+ */
 public class Hallway {
   Position init;
   Position end;
@@ -8,6 +13,12 @@ public class Hallway {
   // mapped to: 5 if horizontal, 6 if vertical
   HashMap<Position, Integer> hallwayLayout = new HashMap<Position, Integer>();
 
+  /**
+   * Constructor for a Hallway.
+   * @param i represents the initial position (first door)
+   * @param e represents the end position (last door)
+   * @param w represents the ArrayList fo waypoints
+   */
   public Hallway(Position i, Position e, ArrayList<Position> w) {
     this.init = i;
     this.end = e;
@@ -15,6 +26,9 @@ public class Hallway {
     this.putHallwayLayout();
   }
 
+  /**
+   * Initializes the Hashmap of Position to Integer representing the hallway layout.
+   */
   private void putHallwayLayout() {
     if (waypoints.size() ==0) {
       compareTwoPositions(init,end);
@@ -44,18 +58,36 @@ public class Hallway {
     }
   }
 
+  /**
+   * Gets the Hallway layout.
+   * @return a Hashmap of Position to Integer representing the Hallway layout.
+   */
   public HashMap<Position, Integer> getHallwayLayout() {
     return this.hallwayLayout;
   }
 
+  /**
+   * Gets the initial position (the position of the first door).
+   * @return a Position
+   */
   public Position getInit() {
     return this.init;
   }
 
+  /**
+   * Gets the end position (the position of the last door).
+   * @return a Position
+   */
   public Position getEnd() {
     return this.end;
   }
 
+  /**
+   * Helper for putHallwayLayout that compares two waypoints to generate all of the positions
+   * between the waypoints.
+   * @param pre represents the previous waypoint
+   * @param next represents the next waypoint
+   */
   private void compareTwoPositions(Position pre, Position next) {
     if ((next.getx() - pre.getx() > 0) && (next.gety() == pre.gety())) {
       for (int j = pre.getx()+1; j <= next.getx(); j++) {

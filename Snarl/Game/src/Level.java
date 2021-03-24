@@ -5,6 +5,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
+/**
+ * This class represents a Level in the game.
+ * It contains an ArrayList of Rooms, an ArrayList of Hallways, a key Position, an exit Position,
+ * a boolean to determine if this is the final level, and a boolean to determine if the exit is unlocked.
+ * It also contains a nested Array representing the ascii representation of the level.
+ */
 public class Level {
   static ArrayList<Room> rooms;
   static ArrayList<Hallway> hallways;
@@ -12,7 +18,7 @@ public class Level {
   HashMap<Position, Integer> levelLayout = new HashMap<>();
   Position key;
   Position exit;
-  static Level finalLevel;
+  static boolean finalLevel;
   //use 2d array to print
   int[][] ascii = new int[30][30];
   //an example of level data
@@ -245,12 +251,22 @@ public class Level {
           "  }\n" +
           "]";
 
+  /**
+   * Constructor for an empty level.
+   */
   public Level() {
     this.rooms = new ArrayList<>();
     this.hallways = new ArrayList<>();
     this.putLevelLayout();
   }
 
+  /**
+   * Constructor for a complete level.
+   * @param r represents the list of rooms
+   * @param h represents the list of hallways
+   * @param k represents the key Position
+   * @param e represents the exit Position
+   */
   public Level(ArrayList<Room> r, ArrayList<Hallway> h, Position k, Position e) {
     this.rooms = r;
     this.hallways = h;
@@ -262,7 +278,12 @@ public class Level {
     this.fill2DArray();
   }
 
-  //constructor for testing
+
+  /**
+   * Constructor for testing levels with two rooms.
+   * @param room1 represents a room in the level
+   * @param room2 represents a room in the level
+   */
   public Level(Room room1, Room room2) {
     this.rooms = new ArrayList<>();
     rooms.add(room1);
@@ -272,7 +293,12 @@ public class Level {
     this.fill2DArray();
   }
 
-  //constructor for testing
+  /**
+   * Constructor for testing levels with two rooms and a hallway.
+   * @param room1 represents a room in the level
+   * @param room2 represents a room in the level
+   * @param h represents a hallway in the level
+   */
   public Level(Room room1, Room room2, Hallway h) {
     this.rooms = new ArrayList<>();
     rooms.add(room1);
@@ -284,20 +310,38 @@ public class Level {
   }
 
   //For testing purposes
+
+  /**
+   * Puts the key and exit at the given positions respectively.
+   * This method is for testing.
+   * @param p1 the key Position
+   * @param p2 the exit Position
+   */
   public void putTestKeyAndExit(Position p1, Position p2) {
     this.levelLayout.put(p1, 7);
     this.levelLayout.put(p2, 8);
 
   }
 
+  /**
+   * Gets the level layout.
+   * @return a Hashmap of Position to Integer representing the level layout
+   */
   public HashMap<Position,Integer> getLevelLayout() {
     return this.levelLayout;
   }
 
+  /**
+   * Gets the current exit status.
+   * @return a boolean representing the current exit status
+   */
   public boolean getExitStatus() {
     return this.exitStatus;
   }
 
+  /**
+   * Fills the ascii art array.
+   */
   public void fill2DArray() {
     for (Position p:levelLayout.keySet()) {
       int x = p.getx();
@@ -306,14 +350,25 @@ public class Level {
     }
   }
 
+  /**
+   * Gets a list of the hallways.
+   * @return an ArrayList of the Hallways
+   */
   public static ArrayList<Hallway> getHallways() {
     return hallways;
   }
 
+  /**
+   * Gets a list of the rooms.
+   * @return an ArrayList of the Rooms
+   */
   public static ArrayList<Room> getRooms() {
     return rooms;
   }
 
+  /**
+   * Fills the level layout Hashmap.
+   */
   private void putLevelLayout() {
     for(int i = 0; i < rooms.size(); i++) {
       Room curr = rooms.get(i);
@@ -357,10 +412,17 @@ public class Level {
     }
   }
 
+  /**
+   * Sets this exit status to the given exit status.
+   * @param exitStatus represents the exitStatus
+   */
   public void setExitStatus(boolean exitStatus) {
     this.exitStatus = exitStatus;
   }
 
+  /**
+   * Puts the key and exit in the level layout Hashmap.
+   */
   private void putKeyandExit() {
     if (levelLayout.get(key) == 2) {
       levelLayout.put(key, 7);
@@ -376,6 +438,10 @@ public class Level {
   }
 
 
+  /**
+   * Renders the current level layout.
+   * @param array represents the ascii art Array
+   */
   public void print2D(int[][] array)
   {
     String original = "";
@@ -427,7 +493,12 @@ public class Level {
     }
   }
 
-  //To return an unoccupied position in the left-most room
+
+  /**
+   * Finds an unoccupied position in the left-most room
+   * @param id represents the ID of the Player we want to place
+   * @return a Position representing the unoccupied leftmost tile
+   */
   public Position findUnoccupiedLeftmost(int id) {
     Position min = new Position(-1 ,-1);
     int upperLeftIndex = -1;
@@ -456,7 +527,12 @@ public class Level {
   }
 
 
-  //To return an unoccupied position in the right-most room
+
+  /**
+   * Finds an unoccupied position in the right-most room
+   * @param id represents the ID of the Adversary we want to place
+   * @return a Position representing the unoccupied rightmost tile
+   */
   public Position findUnoccupiedRightmost(int id) {
     Position min = new Position(-1, -1);
     int bottomRightIndex = -1;
@@ -483,10 +559,10 @@ public class Level {
   }
 
 
-  public void UpdateLevel(Position p, int id) {
-    this.levelLayout.put(p,id);
-  }
-
+  /**
+   * Gets the 2D Array representing our level layout.
+   * @return a 2D Array representing our level layout
+   */
   public int[][] get2Darray() {
     return this.ascii;
   }
