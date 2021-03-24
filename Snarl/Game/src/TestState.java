@@ -47,6 +47,7 @@ public class TestState {
 
   }
 
+
   /**
    * Transforms the given json array of positions to a hashmap of string to position
    * @param positions represents the given json array

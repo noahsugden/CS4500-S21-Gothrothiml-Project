@@ -50,6 +50,24 @@ public class RuleChecker {
         }
     }
 
+    static int determinePlayerInteractionTest(Position curr,
+                                          ArrayList<Position> adversaryPositions, HashMap<String, Position> playerPositions, Boolean exitStatus) {
+        int tileType = levellayout.get(curr);
+        if (tileType ==7) {
+            return 0;
+        } else if (tileType == 8 && !exitStatus) {
+            return 1;
+        } else if (tileType == 8 && exitStatus) {
+            return 2;
+        } else if (adversaryPositions.contains(curr)) {
+            return 3;
+        } else if (playerPositions.containsValue(curr)) {
+            throw new IllegalArgumentException("A player interacts with another player!");
+        } else {
+            return 4;
+        }
+    }
+
     /**
      * Determines the interaction between the given Adversary and the object on the destination tile.
      * @param adversary represents the given Adversary
@@ -182,6 +200,20 @@ public class RuleChecker {
         return possiblePositions.contains(pos) && !playerPositons.containsValue(pos);
 
     }
+
+    public static boolean isValidPlayerMoveTest(Position pos, Position curr, HashMap<String, Position> playerPositons) {
+        ArrayList<Position> possiblePositions = new ArrayList<>();
+        possiblePositions.add(curr);
+        ArrayList<Position> firstCardinal = calculate1Cardinal(curr);
+        for (int i =0;i< firstCardinal.size();i++) {
+            ArrayList<Position> temp;
+            temp = calculate1Cardinal(firstCardinal.get(i));
+            possiblePositions.addAll(temp);
+        }
+        return possiblePositions.contains(pos) && !playerPositons.containsValue(pos);
+
+    }
+
 
     /**
      * Calculate tiles that are visible to a player

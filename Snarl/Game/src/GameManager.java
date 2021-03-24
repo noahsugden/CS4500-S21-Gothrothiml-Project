@@ -27,6 +27,7 @@ public class GameManager {
     boolean levelEnd;
     int turnNumber;
     HashMap<Position, Integer> levelLayout;
+    RuleChecker ruleChecker;
 
     /**
      * This constructor takes in the current level of the game.
@@ -38,13 +39,18 @@ public class GameManager {
     /**
      * This constructor is for testing purposes.
      */
-    GameManager(Level l, ArrayList<Position> adversaryPositions, HashMap<String,
+    GameManager(Level l, HashMap<String,Position> adversaryPositions, HashMap<String,
         Position> playerOrigins) {
         this.l = l;
         this.currentGameState = new GameState(l, playerOrigins, adversaryPositions);
         this.turnNumber = 0;
         levelLayout = l.getLevelLayout();
+        this.ruleChecker = new RuleChecker(l);
 
+    }
+
+    public GameState getCurrentGameState(){
+        return this.currentGameState;
     }
 
     /**
@@ -158,8 +164,12 @@ public class GameManager {
         int posY = pos.gety();
         for(int i = posX - 2; i < posX + 3; i++){
             for(int j = posY - 2; j < posY + 3; j++) {
-                if(i > 0 && j > 0) {
-                    visibleArea[i][j] = levelLayout.get(new Position(i, j));
+                if(i > 0 && j > 0 ) {
+                    if (levelLayout.containsKey((new Position(i, j)))) {
+                        visibleArea[i-posX+2][j-posY+2] = levelLayout.get(new Position(i, j));
+                    } else {
+                        visibleArea[i-posX+2][j-posY+2] =0;
+                    }
                 }
             }
         }
@@ -192,9 +202,11 @@ public class GameManager {
 
     public HashMap<String, Position> getVisibleActors(Position pos) {
         ArrayList<Position> playerPos = new ArrayList<>();
-        ArrayList<Position> adversaryPos = currentGameState.getAdversaryPositions();
+        HashMap<String, Position> adversaryPosMap = currentGameState.getZombiePositionsMap();
         HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
+        ArrayList<Position> adversaryPos = new ArrayList<>();
         playerPos.addAll(playerPosMap.values());
+        adversaryPos.addAll(adversaryPosMap.values());
         HashMap<String, Position> result = new HashMap<>();
         int posX = pos.getx();
         int posY = pos.gety();
@@ -217,11 +229,34 @@ public class GameManager {
             int currX = adversaryPos.get(i).getx();
             int currY = adversaryPos.get(i).gety();
             if(currX >= posX - 2 && currX <= posX + 2 && currY >= posY - 2 && currY <= posY + 2) {
-                result.put("Adversary #" + i, adversaryPos.get(i));
+                String name = "";
+                for(Entry<String, Position> e: adversaryPosMap.entrySet()) {
+                    if(adversaryPos.get(i).equals(e.getValue())) {
+                        name = e.getKey();
+                    }
+                }
+                result.put(name, adversaryPos.get(i));
             }
         }
         return result;
     }
+
+    public boolean determineValidMove(String name, Position move) {
+        HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
+        Position current = playerPosMap.get(name);
+        return ruleChecker.isValidPlayerMoveTest(current, move, playerPosMap);
+
+    }
+
+    public int interactAfterMove(String name, Position curr){
+        HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
+        ArrayList<Position> adversaryPositions = currentGameState.getAdversaryPositions();
+        boolean exitStatus = currentGameState.getExitStatus();
+        int result = RuleChecker.determinePlayerInteractionTest(curr, adversaryPositions, playerPosMap, exitStatus);
+        this.currentGameState.updatePlayerState(name, result,curr);
+        return result;
+    }
+
 
 
 

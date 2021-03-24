@@ -106,10 +106,11 @@ public class GameState {
     }
 
     GameState(Level l, HashMap<String, Position> playerPositionsMap,
-        ArrayList<Position> adversaryPositions) {
+        HashMap<String,Position> adversaryPositionsMap) {
         this.l = l;
         this.playerPositionsMap = playerPositionsMap;
-        this.adversaryPositions = adversaryPositions;
+        this.zombiePositionsMap = adversaryPositionsMap;
+        this.exitStatus = false;
 
     }
 
@@ -244,6 +245,10 @@ public class GameState {
         return this.adversaries.get(index);
     }
 
+    public HashMap<String, Position> getZombiePositionsMap() {
+        return zombiePositionsMap;
+    }
+
     /**
      * Generates an ArrayList of Player positions.
      * @param players represents an ArrayList of the active players
@@ -332,9 +337,21 @@ public class GameState {
         if(adversaryPositions.contains(newP)) {
             players.remove(curr);
         }
-
-
     }
+
+    public void updatePlayerState(String name, int result, Position move){
+        //when player meets an adversary
+        if (result ==3 || result ==2) {
+            this.playerPositionsMap.remove(name);
+        } //when the player picks a key
+        else if (result ==0) {
+            this.exitStatus = true;
+            this.playerPositionsMap.put(name, move);
+        } else {
+            this.playerPositionsMap.put(name, move);
+        }
+    }
+
 
     //Modify the game state after an adversary moves
 

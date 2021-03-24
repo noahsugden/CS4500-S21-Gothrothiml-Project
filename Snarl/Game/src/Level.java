@@ -317,6 +317,7 @@ public class Level {
     return exit;
   }
 
+
   /**
    * Puts the key and exit at the given positions respectively.
    * This method is for testing.
