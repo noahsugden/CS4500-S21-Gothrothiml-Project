@@ -244,7 +244,7 @@ public class GameManager {
     public boolean determineValidMove(String name, Position move) {
         HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
         Position current = playerPosMap.get(name);
-        return ruleChecker.isValidPlayerMoveTest(current, move, playerPosMap);
+        return RuleChecker.isValidPlayerMoveTest(name, current, move, playerPosMap);
 
     }
 
@@ -255,6 +255,14 @@ public class GameManager {
         int result = RuleChecker.determinePlayerInteractionTest(curr, adversaryPositions, playerPosMap, exitStatus);
         this.currentGameState.updatePlayerState(name, result,curr);
         return result;
+    }
+
+    public void updatePlayerState(String name, Position move) {
+        HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
+        ArrayList<Position> adversaryPositions = currentGameState.getAdversaryPositions();
+        boolean exitStatus = currentGameState.getExitStatus();
+        int result =  RuleChecker.determinePlayerInteractionTest(move, adversaryPositions, playerPosMap, exitStatus);
+        this.currentGameState.updatePlayerState(name, result,move);
     }
 
 

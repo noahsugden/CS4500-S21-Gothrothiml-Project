@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import javafx.geometry.Pos;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,7 +16,7 @@ public class TestManager {
   static HashMap<String, Position> playerOrigins = new HashMap<>();
   static HashMap<String, ArrayList<Position>> playerMoves = new HashMap<>();
   static GameManager gameManager;
-  static ArrayList<String> alivePlayers;
+  static ArrayList<String> alivePlayers = new ArrayList<>();
   static HashMap<String,Position> adversaryOrigins = new HashMap<>();
 
 
@@ -25,7 +27,7 @@ public class TestManager {
     for(int i = 0; i < nameList.length(); i++) {
       names.add(nameList.getString(i));
     }
-    alivePlayers = names;
+    alivePlayers.addAll(names);
     levelObject = manager.getJSONObject(1);
     level = TestLevel.getLevel(levelObject);
     natural = manager.getInt(2);
@@ -60,8 +62,23 @@ public class TestManager {
     }
   }
 
+  public static Integer findNextValidPosition(Integer currentIndex,String name, ArrayList<Position> moves) {
+    for (int i=currentIndex+1;i<moves.size();i++) {
+      if (gameManager.determineValidMove(name, moves.get(i))) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   public static JSONArray generateManagerTrace() throws JSONException {
     JSONArray trace = new JSONArray();
+    HashMap<String, Position> playerCurrent = new HashMap<>();
+    for (String name : names) {
+      Position current = gameManager.currentGameState.getPlayerPositionsMap().get(name);
+      playerCurrent.put(name, current);
+    }
+
     //generate the initial updates
     JSONArray initialUpdate = generatePlayerUpdate();
     for (int i = 0;i < initialUpdate.length();i++) {
@@ -69,27 +86,61 @@ public class TestManager {
     }
     int turn = 0;
     while (turn<natural && alivePlayers.size()>0) {
-      for(int i =0;i<alivePlayers.size();i++) {
-        String name = alivePlayers.get(i);
-        ArrayList<Position> moves = playerMoves.get(name);
-        if (moves.size()==0) {
-          return trace;
+        for (String name : names) {
+          if (alivePlayers.contains(name)) {
+            Position nextMove;
+            ArrayList<Position> moves = playerMoves.get(name);
+            if (moves.size() == 0) {
+              return trace;
+            }
+            Position current = playerCurrent.get(name);
+            if (moves.contains(current) && moves.indexOf(current) + 1 != moves.size()) {
+              nextMove = moves.get(moves.indexOf(current) + 1);
+            } else if (!moves.contains(current)) {
+              nextMove = moves.get(0);
+            } else {
+              return trace;
+            }
+            if (gameManager.determineValidMove(name, nextMove)) {
+              JSONArray actorMove = generateActorMove(name, nextMove);
+              trace.put(actorMove);
+              if (!nextMove.equals(new Position(-1, -1))) {
+                gameManager.updatePlayerState(name, nextMove);
+                playerCurrent.remove(name);
+                playerCurrent.put(name, nextMove);
+              } else {
+                playerCurrent.remove(name);
+                playerCurrent.put(name, nextMove);
+              }
+            } else {
+              JSONArray actorMove = generateActorMove(name, nextMove);
+              trace.put(actorMove);
+              while (moves.indexOf(nextMove)+1 != moves.size() && !gameManager.determineValidMove(name, nextMove)) {
+                nextMove = moves.get(moves.indexOf(nextMove)+1);
+                actorMove = generateActorMove(name, nextMove);
+                trace.put(actorMove);
+                if (gameManager.determineValidMove(name, nextMove)) {
+                  playerCurrent.remove(name);
+                  playerCurrent.put(name, nextMove);
+                  gameManager.updatePlayerState(name, nextMove);
+                  break;
+                }
+              }
+
+            }
+
+            if (moves.size() == 0) {
+              return trace;
+            }
+            JSONArray updates = generatePlayerUpdate();
+            for (int j = 0; j < updates.length(); j++) {
+          //    trace.put(updates.get(j));
+            }
+          }
         }
-        JSONArray actorMove = generateActorMove(name, moves.get(0));
-        trace.put(actorMove);
-        while (moves.size()!=0 &&!gameManager.determineValidMove(name, moves.get(0))) {
-          moves.remove(0);
-        }
-        if (moves.size()==0) {
-          return trace;
-        }
-        JSONArray updates = generatePlayerUpdate();
-        for (int j = 0;j < updates.length();j++) {
-          trace.put(updates.get(j));
-        }
+        turn = turn + 1;
       }
-      turn = turn +1;
-    }
+
     return trace;
 
   }
@@ -112,7 +163,7 @@ public class TestManager {
     JSONArray actorPositionList = new JSONArray();
     for (int i=0;i<alivePlayers.size();i++) {
       String name = alivePlayers.get(i);
-      Position curr = gameManager.getCurrentGameState().getPlayerPositionsMap().get(name);
+      Position curr = finalPositionsMap.get(name);
       JSONArray positionArray = positionToArray(curr);
       JSONObject actorObject = new JSONObject();
       actorObject.put("type", "player");
@@ -202,11 +253,13 @@ return state;
           result.put("Eject");
           alivePlayers.remove(name);
           return result;
+        } else {
+          result.put("OK");
+          return result;
         }
       }
     }
 
-    return result;
   }
 
   public static JSONArray generatePlayerUpdate() throws JSONException {
@@ -293,51 +346,62 @@ return state;
   }
 
   public static void main(String[] args) throws JSONException{
-    readString("[ [\"ferd\", \"dio\"]\n" +
-            ", { \"type\": \"level\",\n" +
-            "      \"rooms\": [ { \"type\": \"room\",\n" +
-            "        \"origin\": [ 0, 0 ],\n" +
+    readString("[\n" +
+            "  [\"dio\" ],\n" +
+            "  {\n" +
+            "    \"type\": \"level\",\n" +
+            "    \"rooms\": [\n" +
+            "      {\n" +
+            "        \"type\": \"room\",\n" +
+            "        \"origin\": [ 2, 2 ],\n" +
             "        \"bounds\": { \"rows\": 5, \"columns\": 5 },\n" +
-            "        \"layout\": [ [ 0, 0, 2, 0, 0 ],\n" +
-            "          [ 0, 1, 1, 0, 0 ],\n" +
-            "          [ 0, 1, 1, 0, 2 ],\n" +
-            "          [ 0, 1, 0, 1, 0 ],\n" +
-            "          [ 0, 0, 0, 0, 0 ]] },\n" +
-            "        { \"type\": \"room\",\n" +
-            "          \"origin\": [ 8, 9 ],\n" +
-            "          \"bounds\": { \"rows\": 4, \"columns\": 3 },\n" +
-            "          \"layout\": [ [ 0, 0, 1 ],\n" +
-            "            [ 0, 1, 1 ],\n" +
-            "            [ 2, 1, 1 ],\n" +
-            "            [ 0, 1, 2 ]] },\n" +
-            "        { \"type\": \"room\",\n" +
-            "          \"origin\": [ 2, 16 ],\n" +
-            "          \"bounds\": { \"rows\": 4, \"columns\": 4 },\n" +
-            "          \"layout\": [ [ 0, 0, 2, 0 ],\n" +
-            "            [ 0, 1, 1, 1 ],\n" +
-            "            [ 0, 1, 1, 2 ],\n" +
-            "            [ 0, 1, 1, 1 ]] } ],\n" +
-            "      \"objects\": [ { \"type\": \"key\", \"position\": [ 2, 2 ] },\n" +
-            "        { \"type\": \"exit\", \"position\": [ 5, 17 ] } ],\n" +
-            "      \"hallways\": [ { \"type\": \"hallway\",\n" +
-            "        \"from\": [ 2, 4 ],\n" +
-            "        \"to\": [ 10, 9 ],\n" +
-            "        \"waypoints\": [ [2, 5], [ 10, 5 ]] },\n" +
-            "        { \"type\": \"hallway\",\n" +
-            "          \"from\": [ 11, 11 ],\n" +
-            "          \"to\": [ 4, 19 ],\n" +
-            "          \"waypoints\": [ [ 11, 20 ], [ 4, 20 ]] } ]\n" +
-            "    }" +
-            ", 5\n" +
-            ", [ [3, 2], [5, 8], [14, 12] ]\n" +
-            ", [ [ { \"type\": \"move\", \"to\": [4, 2] }\n" +
-            "    , { \"type\": \"move\", \"to\": [5, 3] } \n" +
+            "        \"layout\": [\n" +
+            "          [ 0, 0, 0, 0, 0 ],\n" +
+            "          [ 0, 1, 1, 1, 0 ],\n" +
+            "          [ 0, 1, 1, 1, 2 ],\n" +
+            "          [ 0, 1, 1, 1, 0 ],\n" +
+            "          [ 0, 0, 0, 0, 0 ]\n" +
+            "        ]\n" +
+            "      },\n" +
+            "      {\n" +
+            "        \"type\": \"room\",\n" +
+            "        \"origin\": [ 8, 8 ],\n" +
+            "        \"bounds\": { \"rows\": 5, \"columns\": 5 },\n" +
+            "        \"layout\": [\n" +
+            "          [ 0, 0, 2, 0, 0 ],\n" +
+            "          [ 0, 1, 1, 1, 0 ],\n" +
+            "          [ 0, 1, 1, 1, 0 ],\n" +
+            "          [ 0, 1, 1, 1, 0 ],\n" +
+            "          [ 0, 0, 0, 0, 0 ]\n" +
+            "        ]\n" +
+            "      }\n" +
+            "    ],\n" +
+            "    \"hallways\": [\n" +
+            "      {\n" +
+            "        \"type\": \"hallway\",\n" +
+            "        \"from\": [ 4, 6 ],\n" +
+            "        \"to\": [ 8, 10 ],\n" +
+            "        \"waypoints\": [ [ 4, 10 ] ]\n" +
+            "      }\n" +
+            "    ],\n" +
+            "    \"objects\": [\n" +
+            "      { \"type\": \"exit\", \"position\": [ 4, 4 ] },\n" +
+            "      { \"type\": \"key\", \"position\": [ 10, 10 ] }\n" +
             "    ]\n" +
-            "  , [ { \"type\": \"move\", \"to\": [3, 6] }\n" +
-            "    , { \"type\": \"move\", \"to\": [4, 7] }\n" +
-            "    , { \"type\": \"move\", \"to\": [6, 7] } \n" +
+            "  },\n" +
+            "  5,\n" +
+            "  [  [ 4, 3], [ 9, 10 ] ],\n" +
+            "  [\n" +
+            "   \n" +
+            "    [  { \"type\": \"move\", \"to\": [ 4, 4 ] },\n" +
+            "      { \"type\": \"move\", \"to\": [ 4, 6 ] },\n" +
+            "      { \"type\": \"move\", \"to\": [ 4, 8 ] },\n" +
+            "      { \"type\": \"move\", \"to\": [ 4, 10 ] },\n" +
+            "      { \"type\": \"move\", \"to\": [ 4, 12 ] },\n" +
+            "      { \"type\": \"move\", \"to\": [ 6, 10 ] },\n" +
+            "      { \"type\": \"move\", \"to\": [ 8, 10 ] }\n" +
             "    ]\n" +
             "  ]\n" +
-            "]");
+            "]\n");
   }
 }

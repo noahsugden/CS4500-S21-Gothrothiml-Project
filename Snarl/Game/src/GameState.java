@@ -110,6 +110,7 @@ public class GameState {
         this.l = l;
         this.playerPositionsMap = playerPositionsMap;
         this.zombiePositionsMap = adversaryPositionsMap;
+        adversaryPositions.addAll(zombiePositionsMap.values());
         this.exitStatus = false;
 
     }
@@ -346,8 +347,10 @@ public class GameState {
         } //when the player picks a key
         else if (result ==0) {
             this.exitStatus = true;
+            this.playerPositionsMap.remove(name);
             this.playerPositionsMap.put(name, move);
         } else {
+            this.playerPositionsMap.remove(name);
             this.playerPositionsMap.put(name, move);
         }
     }

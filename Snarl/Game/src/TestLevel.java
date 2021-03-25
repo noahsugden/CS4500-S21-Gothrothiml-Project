@@ -44,12 +44,11 @@ public class TestLevel {
       exit = objects.getJSONObject(0);
     } else {
       temp = objects.getJSONObject(0);
-      if (temp.keys().next().equals("exit")) {
+      if (temp.getString("type").equals("exit")) {
         exit = temp;
         key = objects.getJSONObject(1);
         JSONArray keyPos = key.getJSONArray("position");
         keyPosition = new Position(keyPos.getInt(0), keyPos.getInt(1));
-
       } else {
         key = temp;
         exit = objects.getJSONObject(1);
