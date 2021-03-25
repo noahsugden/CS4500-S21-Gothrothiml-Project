@@ -2,6 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class represents a RuleChecker that will be used by the Game Manager to determine the
@@ -50,8 +51,16 @@ public class RuleChecker {
         }
     }
 
-    static int determinePlayerInteractionTest(Position curr,
+    static int determinePlayerInteractionTest(String name, Position curr,
                                           ArrayList<Position> adversaryPositions, HashMap<String, Position> playerPositions, Boolean exitStatus) {
+
+        String playerName = "";
+        for(Map.Entry<String, Position> e: playerPositions.entrySet()) {
+
+            if(e.getValue().equals(curr)) {
+                playerName = e.getKey();
+            }
+        }
         if (curr.equals(new Position(-1, -1))) {
             return 4;
         }
@@ -64,12 +73,13 @@ public class RuleChecker {
             return 2;
         } else if (tileType ==7) {
             return 0;
-        } else if (playerPositions.containsValue(curr)) {
+        } else if (playerPositions.containsValue(curr) && !playerName.equals(name)) {
             throw new IllegalArgumentException("A player interacts with another player!");
         } else {
             return 4;
         }
     }
+
 
     /**
      * Determines the interaction between the given Adversary and the object on the destination tile.

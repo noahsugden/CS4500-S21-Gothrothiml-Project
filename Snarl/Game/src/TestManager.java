@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javafx.geometry.Pos;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,14 +16,14 @@ public class TestManager {
   static HashMap<String, ArrayList<Position>> playerMoves = new HashMap<>();
   static GameManager gameManager;
   static ArrayList<String> alivePlayers = new ArrayList<>();
-  static HashMap<String,Position> adversaryOrigins = new HashMap<>();
+  static HashMap<String, Position> adversaryOrigins = new HashMap<>();
 
 
   static void readString(String s) throws JSONException {
     JSONArray manager = new JSONArray(s);
     JSONArray nameList = manager.getJSONArray(0);
     names = new ArrayList<>();
-    for(int i = 0; i < nameList.length(); i++) {
+    for (int i = 0; i < nameList.length(); i++) {
       names.add(nameList.getString(i));
     }
     alivePlayers.addAll(names);
@@ -33,12 +32,12 @@ public class TestManager {
     natural = manager.getInt(2);
     JSONArray pointList = manager.getJSONArray(3);
     positionList = new ArrayList<>();
-    for(int i = 0; i < pointList.length(); i++) {
+    for (int i = 0; i < pointList.length(); i++) {
       positionList.add(modifyPosition(pointList.getJSONArray(i)));
     }
     generatePlayerAndAdversaryPositionsMap();
-    for (int i=0;i<adversaryPositions.size();i++) {
-      adversaryOrigins.put("zombie#"+i, adversaryPositions.get(i));
+    for (int i = 0; i < adversaryPositions.size(); i++) {
+      adversaryOrigins.put("zombie#" + i, adversaryPositions.get(i));
     }
     JSONArray actorMoveListList = manager.getJSONArray(4);
     generatePlayerMovesMap(actorMoveListList);
@@ -54,22 +53,14 @@ public class TestManager {
 
   public static void generatePlayerAndAdversaryPositionsMap() {
     adversaryPositions = new ArrayList<>();
-    for(int i = 0; i < names.size(); i++) {
+    for (int i = 0; i < names.size(); i++) {
       playerOrigins.put(names.get(i), positionList.get(i));
     }
-    for(int i = names.size(); i < positionList.size(); i++) {
+    for (int i = names.size(); i < positionList.size(); i++) {
       adversaryPositions.add(positionList.get(i));
     }
   }
 
-  public static Integer findNextValidPosition(Integer currentIndex,String name, ArrayList<Position> moves) {
-    for (int i=currentIndex+1;i<moves.size();i++) {
-      if (gameManager.determineValidMove(name, moves.get(i))) {
-        return i;
-      }
-    }
-    return -1;
-  }
 
   public static JSONArray generateManagerTrace() throws JSONException {
     JSONArray trace = new JSONArray();
@@ -81,65 +72,71 @@ public class TestManager {
 
     //generate the initial updates
     JSONArray initialUpdate = generatePlayerUpdate();
-    for (int i = 0;i < initialUpdate.length();i++) {
+    for (int i = 0; i < initialUpdate.length(); i++) {
       trace.put(initialUpdate.get(i));
     }
     int turn = 0;
-    while (turn<natural && alivePlayers.size()>0) {
-        for (String name : names) {
-          if (alivePlayers.contains(name)) {
-            Position nextMove;
-            ArrayList<Position> moves = playerMoves.get(name);
-            if (moves.size() == 0) {
-              return trace;
-            }
-            Position current = playerCurrent.get(name);
-            if (moves.contains(current) && moves.indexOf(current) + 1 != moves.size()) {
-              nextMove = moves.get(moves.indexOf(current) + 1);
-            } else if (!moves.contains(current)) {
-              nextMove = moves.get(0);
+    for (int i = 0; i < natural && alivePlayers.size() > 0; i++) {
+      for (String name : names) {
+        if (alivePlayers.contains(name)) {
+          Position nextMove;
+          ArrayList<Position> moves = playerMoves.get(name);
+          if (moves.size() == 0) {
+            return trace;
+          }
+          Position current = playerCurrent.get(name);
+          if (moves.contains(current) && moves.indexOf(current) + 1 != moves.size()) {
+            nextMove = moves.get(moves.indexOf(current) + 1);
+          } else if (!moves.contains(current)) {
+            nextMove = moves.get(0);
+          } else {
+            return trace;
+          }
+          if (gameManager.determineValidMove(name, nextMove)) {
+            JSONArray actorMove = generateActorMove(name, nextMove);
+            trace.put(actorMove);
+            if (!nextMove.equals(new Position(-1, -1))) {
+              gameManager.updatePlayerState(name, nextMove);
+              playerCurrent.remove(name);
+              playerCurrent.put(name, nextMove);
             } else {
-              return trace;
+              playerCurrent.remove(name);
+              playerCurrent.put(name, nextMove);
             }
-            if (gameManager.determineValidMove(name, nextMove)) {
-              JSONArray actorMove = generateActorMove(name, nextMove);
+          } else {
+            JSONArray actorMove = generateActorMove(name, nextMove);
+            trace.put(actorMove);
+            int start = moves.indexOf(nextMove) + 1;
+            for (int j = start; j < moves.size(); j++) {
+              Position nextNextMove = moves.get(j);
+              actorMove = generateActorMove(name, nextNextMove);
               trace.put(actorMove);
-              if (!nextMove.equals(new Position(-1, -1))) {
-                gameManager.updatePlayerState(name, nextMove);
+              if (nextNextMove.equals(new Position(-1, -1))) {
                 playerCurrent.remove(name);
-                playerCurrent.put(name, nextMove);
-              } else {
+                playerCurrent.put(name, nextNextMove);
+                break;
+              }
+              if (gameManager.determineValidMove(name, nextNextMove)) {
                 playerCurrent.remove(name);
-                playerCurrent.put(name, nextMove);
+                playerCurrent.put(name, nextNextMove);
+                gameManager.updatePlayerState(name, nextNextMove);
+                break;
               }
-            } else {
-              JSONArray actorMove = generateActorMove(name, nextMove);
-              trace.put(actorMove);
-              while (moves.indexOf(nextMove)+1 != moves.size() && !gameManager.determineValidMove(name, nextMove)) {
-                nextMove = moves.get(moves.indexOf(nextMove)+1);
-                actorMove = generateActorMove(name, nextMove);
-                trace.put(actorMove);
-                if (gameManager.determineValidMove(name, nextMove)) {
-                  playerCurrent.remove(name);
-                  playerCurrent.put(name, nextMove);
-                  gameManager.updatePlayerState(name, nextMove);
-                  break;
-                }
-              }
-
             }
 
-            if (moves.size() == 0) {
-              return trace;
-            }
-            JSONArray updates = generatePlayerUpdate();
-            for (int j = 0; j < updates.length(); j++) {
-          //    trace.put(updates.get(j));
-            }
+          }
+
+          if (moves.size() == 0) {
+            return trace;
+          }
+          JSONArray updates = generatePlayerUpdate();
+          for (int j = 0; j < updates.length(); j++) {
+            trace.put(updates.get(j));
           }
         }
-        turn = turn + 1;
       }
+//        turn = turn + 1;
+    }
 
     return trace;
 
@@ -152,7 +149,12 @@ public class TestManager {
     state.put("type", "state");
     if (exitStatus) {
       JSONArray objects = levelObject.getJSONArray("objects");
-      objects.remove(0);
+      JSONObject temp = objects.getJSONObject(0);
+      if (temp.getString("type").equals("key")) {
+        objects.remove(0);
+      } else {
+        objects.remove(1);
+      }
       levelObject.remove("objects");
       levelObject.put("objects", objects);
       state.put("exit-locked", false);
@@ -161,7 +163,7 @@ public class TestManager {
       state.put("level", levelObject);
     }
     JSONArray actorPositionList = new JSONArray();
-    for (int i=0;i<alivePlayers.size();i++) {
+    for (int i = 0; i < alivePlayers.size(); i++) {
       String name = alivePlayers.get(i);
       Position curr = finalPositionsMap.get(name);
       JSONArray positionArray = positionToArray(curr);
@@ -173,7 +175,7 @@ public class TestManager {
     }
     state.put("players", actorPositionList);
     JSONArray adversaryPositionList = new JSONArray();
-    for (String s: adversaryOrigins.keySet()){
+    for (String s : adversaryOrigins.keySet()) {
       Position curr = adversaryOrigins.get(s);
       JSONArray positionArray = positionToArray(curr);
       JSONObject adversaryObject = new JSONObject();
@@ -183,27 +185,25 @@ public class TestManager {
       adversaryPositionList.put(adversaryObject);
     }
     state.put("adversaries", adversaryPositionList);
-    if(exitStatus) {
+    if (exitStatus) {
       state.put("exit-locked", false);
     } else {
       state.put("exit-locked", true);
     }
-return state;
+    return state;
   }
-
-
 
 
   public static void generatePlayerMovesMap(JSONArray actorMoveListList) throws JSONException {
     playerMoves = new HashMap<>();
     Position destination;
 
-    for(int i = 0; i < actorMoveListList.length(); i++) {
+    for (int i = 0; i < actorMoveListList.length(); i++) {
       JSONArray curr = actorMoveListList.getJSONArray(i);
       ArrayList<Position> positions = new ArrayList<>();
-      for(int j = 0; j < curr.length(); j++) {
+      for (int j = 0; j < curr.length(); j++) {
         JSONObject temp = curr.getJSONObject(j);
-        if(temp.get("to")==JSONObject.NULL) {
+        if (temp.get("to") == JSONObject.NULL) {
           destination = new Position(-1, -1);
         } else {
           JSONArray move = temp.getJSONArray("to");
@@ -245,11 +245,11 @@ return state;
         if (interactResult == 0) {
           result.put("Key");
           return result;
-        } else if(interactResult ==2) {
+        } else if (interactResult == 2) {
           result.put("Exit");
           alivePlayers.remove(name);
           return result;
-        } else if (interactResult ==3) {
+        } else if (interactResult == 3) {
           result.put("Eject");
           alivePlayers.remove(name);
           return result;
@@ -265,26 +265,27 @@ return state;
   public static JSONArray generatePlayerUpdate() throws JSONException {
     JSONArray result = new JSONArray();
     GameState gs = gameManager.getCurrentGameState();
-    HashMap<String,Position> playerPositionsMap = gs.getPlayerPositionsMap();
-    for (int i =0; i< alivePlayers.size();i++) {
+    HashMap<String, Position> playerPositionsMap = gs.getPlayerPositionsMap();
+    for (int i = 0; i < alivePlayers.size(); i++) {
       JSONArray playerUpdateArray = new JSONArray();
       playerUpdateArray.put(alivePlayers.get(i));
+      JSONArray singleUpdate = new JSONArray();
       JSONObject playerUpdate = new JSONObject();
-      playerUpdate.put( "type","player-update");
+      playerUpdate.put("type", "player-update");
       Position curr = playerPositionsMap.get(alivePlayers.get(i));
       JSONArray tileLayout = getTileLayout(curr);
-      playerUpdate.put( "layout", tileLayout);
+      playerUpdate.put("layout", tileLayout);
       JSONArray position = positionToArray(curr);
       playerUpdate.put("position", position);
       HashMap<String, Position> objects = gameManager.getVisibleObjects(curr);
       JSONArray objectArray = new JSONArray();
-      for (String s:objects.keySet()) {
-        if(s.equals("key")) {
+      for (String s : objects.keySet()) {
+        if (s.equals("key")) {
           JSONObject keyObject = new JSONObject();
           keyObject.put("type", "key");
           keyObject.put("position", positionToArray(objects.get("key")));
           objectArray.put(keyObject);
-        } else if(s.equals("exit")) {
+        } else if (s.equals("exit")) {
           JSONObject exitObject = new JSONObject();
           exitObject.put("type", "exit");
           exitObject.put("position", positionToArray(objects.get("exit")));
@@ -292,32 +293,38 @@ return state;
         }
       }
       playerUpdate.put("objects", objectArray);
-      playerUpdate.put("actors", generateActorPositionList(curr));
-      result.put(playerUpdate);
+      playerUpdate.put("actors", generateActorPositionList(alivePlayers.get(i), curr));
+      singleUpdate.put(playerUpdate);
+      singleUpdate.put(alivePlayers.get(i));
+      result.put(singleUpdate);
     }
     return result;
   }
 
-  public static JSONArray generateActorPositionList(Position pos) throws JSONException {
+  public static JSONArray generateActorPositionList(String name, Position pos) throws JSONException {
     JSONArray result = new JSONArray();
     HashMap<String, Position> actors = gameManager.getVisibleActors(pos);
-    for(String s: actors.keySet()) {
-      if(alivePlayers.contains(s)){
-        JSONObject playerObject = new JSONObject();
-        playerObject.put("type", "player");
-        playerObject.put("name", s);
-        playerObject.put("position", positionToArray(actors.get(s)));
-      } else {
-        JSONObject adversaryObject = new JSONObject();
-        adversaryObject.put("type", "zombie");
-        adversaryObject.put("name", s);
-        adversaryObject.put("position", positionToArray(actors.get(s)));
+    for (String s : actors.keySet()) {
+      if (!s.equals(name)) {
+        if (alivePlayers.contains(s)) {
+          JSONObject playerObject = new JSONObject();
+          playerObject.put("type", "player");
+          playerObject.put("name", s);
+          playerObject.put("position", positionToArray(actors.get(s)));
+          result.put(playerObject);
+        } else {
+          JSONObject adversaryObject = new JSONObject();
+          adversaryObject.put("type", "zombie");
+          adversaryObject.put("name", s);
+          adversaryObject.put("position", positionToArray(actors.get(s)));
+          result.put(adversaryObject);
+        }
       }
     }
     return result;
   }
 
-  public static JSONArray positionToArray(Position p){
+  public static JSONArray positionToArray(Position p) {
     JSONArray result = new JSONArray();
     result.put(p.getx());
     result.put(p.gety());
@@ -327,14 +334,14 @@ return state;
   public static JSONArray getTileLayout(Position pos) {
     int[][] tileArray = gameManager.getVisibleArea(pos);
     JSONArray result = new JSONArray();
-    for(int i = 0; i < tileArray.length; i++) {
+    for (int i = 0; i < tileArray.length; i++) {
       JSONArray curr = new JSONArray();
-      for(int j = 0; j < tileArray.length; j++) {
-        if(tileArray[j][i] == 1) {
+      for (int j = 0; j < tileArray.length; j++) {
+        if (tileArray[i][j] == 1) {
           curr.put(0);
-        } else if(tileArray[j][i] == 2 || tileArray[j][i] == 7 || tileArray[j][i] == 8 || tileArray[j][i]==5 || tileArray[j][i]==6) {
+        } else if (tileArray[i][j] == 2 || tileArray[i][j] == 7 || tileArray[i][j] == 8 || tileArray[i][j] == 5 || tileArray[i][j] == 6) {
           curr.put(1);
-        } else if(tileArray[j][i] == 4) {
+        } else if (tileArray[i][j] == 4) {
           curr.put(2);
         } else {
           curr.put(0);
@@ -345,9 +352,9 @@ return state;
     return result;
   }
 
-  public static void main(String[] args) throws JSONException{
+  public static void main(String[] args) throws JSONException {
     readString("[\n" +
-            "  [\"dio\" ],\n" +
+            "  [ \"noah\", \"ben\" ],\n" +
             "  {\n" +
             "    \"type\": \"level\",\n" +
             "    \"rooms\": [\n" +
@@ -390,18 +397,17 @@ return state;
             "    ]\n" +
             "  },\n" +
             "  5,\n" +
-            "  [  [ 4, 3], [ 9, 10 ] ],\n" +
+            "  [ [ 3, 3 ], [ 9, 9 ], [ 10, 10 ] ],\n" +
             "  [\n" +
-            "   \n" +
-            "    [  { \"type\": \"move\", \"to\": [ 4, 4 ] },\n" +
-            "      { \"type\": \"move\", \"to\": [ 4, 6 ] },\n" +
-            "      { \"type\": \"move\", \"to\": [ 4, 8 ] },\n" +
-            "      { \"type\": \"move\", \"to\": [ 4, 10 ] },\n" +
-            "      { \"type\": \"move\", \"to\": [ 4, 12 ] },\n" +
-            "      { \"type\": \"move\", \"to\": [ 6, 10 ] },\n" +
-            "      { \"type\": \"move\", \"to\": [ 8, 10 ] }\n" +
+            "    [\n" +
+            "      { \"type\": \"move\", \"to\": [ 4, 4 ] },\n" +
+            "      { \"type\": \"move\", \"to\": [ 4, 6 ] }\n" +
+            "    ],\n" +
+            "    [\n" +
+            "      { \"type\": \"move\", \"to\": [ 10, 10 ] },\n" +
+            "      { \"type\": \"move\", \"to\": null }\n" +
             "    ]\n" +
             "  ]\n" +
-            "]\n");
+            "]");
   }
 }

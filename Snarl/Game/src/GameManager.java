@@ -187,13 +187,13 @@ public class GameManager {
             int keyX = key.getx();
             int keyY = key.gety();
             if(keyX >= posX - 2 && keyX <= posX + 2 && keyY >= posY - 2 && keyY <= posY + 2) {
-                result.put("Key", key);
+                result.put("key", key);
             }
         }
         int exitX = exit.getx();
         int exitY = exit.gety();
         if(exitX >= posX - 2 && exitX <= posX + 2 && exitY >= posY - 2 && exitY <= posY + 2) {
-            result.put("Exit", exit);
+            result.put("exit", exit);
         }
 
         return result;
@@ -235,6 +235,8 @@ public class GameManager {
                         name = e.getKey();
                     }
                 }
+                System.out.println(name);
+                pos.print();
                 result.put(name, adversaryPos.get(i));
             }
         }
@@ -252,8 +254,8 @@ public class GameManager {
         HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
         ArrayList<Position> adversaryPositions = currentGameState.getAdversaryPositions();
         boolean exitStatus = currentGameState.getExitStatus();
-        int result = RuleChecker.determinePlayerInteractionTest(curr, adversaryPositions, playerPosMap, exitStatus);
-        this.currentGameState.updatePlayerState(name, result,curr);
+        int result = RuleChecker.determinePlayerInteractionTest(name, curr, adversaryPositions, playerPosMap, exitStatus);
+//        this.currentGameState.updatePlayerState(name, result,curr);
         return result;
     }
 
@@ -261,7 +263,7 @@ public class GameManager {
         HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
         ArrayList<Position> adversaryPositions = currentGameState.getAdversaryPositions();
         boolean exitStatus = currentGameState.getExitStatus();
-        int result =  RuleChecker.determinePlayerInteractionTest(move, adversaryPositions, playerPosMap, exitStatus);
+        int result =  RuleChecker.determinePlayerInteractionTest(name, move, adversaryPositions, playerPosMap, exitStatus);
         this.currentGameState.updatePlayerState(name, result,move);
     }
 
