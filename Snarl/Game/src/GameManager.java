@@ -235,8 +235,6 @@ public class GameManager {
                         name = e.getKey();
                     }
                 }
-                System.out.println(name);
-                pos.print();
                 result.put(name, adversaryPos.get(i));
             }
         }

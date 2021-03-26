@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -353,61 +354,13 @@ public class TestManager {
   }
 
   public static void main(String[] args) throws JSONException {
-    readString("[\n" +
-            "  [ \"noah\", \"ben\" ],\n" +
-            "  {\n" +
-            "    \"type\": \"level\",\n" +
-            "    \"rooms\": [\n" +
-            "      {\n" +
-            "        \"type\": \"room\",\n" +
-            "        \"origin\": [ 2, 2 ],\n" +
-            "        \"bounds\": { \"rows\": 5, \"columns\": 5 },\n" +
-            "        \"layout\": [\n" +
-            "          [ 0, 0, 0, 0, 0 ],\n" +
-            "          [ 0, 1, 1, 1, 0 ],\n" +
-            "          [ 0, 1, 1, 1, 2 ],\n" +
-            "          [ 0, 1, 1, 1, 0 ],\n" +
-            "          [ 0, 0, 0, 0, 0 ]\n" +
-            "        ]\n" +
-            "      },\n" +
-            "      {\n" +
-            "        \"type\": \"room\",\n" +
-            "        \"origin\": [ 8, 8 ],\n" +
-            "        \"bounds\": { \"rows\": 5, \"columns\": 5 },\n" +
-            "        \"layout\": [\n" +
-            "          [ 0, 0, 2, 0, 0 ],\n" +
-            "          [ 0, 1, 1, 1, 0 ],\n" +
-            "          [ 0, 1, 1, 1, 0 ],\n" +
-            "          [ 0, 1, 1, 1, 0 ],\n" +
-            "          [ 0, 0, 0, 0, 0 ]\n" +
-            "        ]\n" +
-            "      }\n" +
-            "    ],\n" +
-            "    \"hallways\": [\n" +
-            "      {\n" +
-            "        \"type\": \"hallway\",\n" +
-            "        \"from\": [ 4, 6 ],\n" +
-            "        \"to\": [ 8, 10 ],\n" +
-            "        \"waypoints\": [ [ 4, 10 ] ]\n" +
-            "      }\n" +
-            "    ],\n" +
-            "    \"objects\": [\n" +
-            "      { \"type\": \"exit\", \"position\": [ 4, 4 ] },\n" +
-            "      { \"type\": \"key\", \"position\": [ 10, 10 ] }\n" +
-            "    ]\n" +
-            "  },\n" +
-            "  5,\n" +
-            "  [ [ 3, 3 ], [ 9, 9 ], [ 10, 10 ] ],\n" +
-            "  [\n" +
-            "    [\n" +
-            "      { \"type\": \"move\", \"to\": [ 4, 4 ] },\n" +
-            "      { \"type\": \"move\", \"to\": [ 4, 6 ] }\n" +
-            "    ],\n" +
-            "    [\n" +
-            "      { \"type\": \"move\", \"to\": [ 10, 10 ] },\n" +
-            "      { \"type\": \"move\", \"to\": null }\n" +
-            "    ]\n" +
-            "  ]\n" +
-            "]");
+    Scanner sc = new Scanner(System.in);
+    StringBuilder sb = new StringBuilder();
+    while (sc.hasNextLine()){
+      String curr = sc.nextLine();
+      sb.append(curr);
+    }
+    String input = sb.toString();
+    readString(input);
   }
 }
