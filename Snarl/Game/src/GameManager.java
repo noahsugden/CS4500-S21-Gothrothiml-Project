@@ -99,7 +99,7 @@ public class GameManager {
 
     /**
      * Sends a modified version of the current game state to each player.
-     * For now, we are sending a list of traversable tiles.
+     * For now, we are sending a list of visible tiles.
      */
     public void sendCurrentState() {
 
