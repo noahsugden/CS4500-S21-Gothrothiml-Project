@@ -33,7 +33,8 @@ public class RuleChecker {
      *         2 for unlocked exit event, 3 for adversary event, 4 for an empty tile
      */
     static int determinePlayerInteraction(Player player,
-                                          HashMap<Integer, Position> adversaryPositions, HashMap<Integer, Position> playerPositions, Boolean exitStatus) {
+                                          HashMap<Integer, Position> adversaryPositions,
+        HashMap<Integer, Position> playerPositions, Boolean exitStatus) {
         Position curr = player.getP();
         int tileType = levellayout.get(curr);
         if (tileType ==7) {
@@ -52,7 +53,8 @@ public class RuleChecker {
     }
 
     static int determinePlayerInteractionTest(String name, Position curr,
-                                          ArrayList<Position> adversaryPositions, HashMap<String, Position> playerPositions, Boolean exitStatus) {
+                                          ArrayList<Position> adversaryPositions, HashMap<String,
+        Position> playerPositions, Boolean exitStatus) {
 
         String playerName = "";
         for(Map.Entry<String, Position> e: playerPositions.entrySet()) {

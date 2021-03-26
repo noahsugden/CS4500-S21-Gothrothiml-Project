@@ -22,8 +22,8 @@ public class GameManager {
     ArrayList<String> adversaryUsernames;
     GameState currentGameState;
     Level l;
-    HashMap<Integer,Position> playerIDpositions;
-    HashMap<Integer,Position> adversaryIDpositions;
+    HashMap<Integer, Position> playerIDpositions;
+    HashMap<Integer, Position> adversaryIDpositions;
     boolean levelEnd;
     int turnNumber;
     HashMap<Position, Integer> levelLayout;
@@ -31,7 +31,7 @@ public class GameManager {
 
     /**
      * This constructor takes in the current level of the game.
-      */
+     */
     GameManager(Level l) {
         this.l = l;
     }
@@ -39,7 +39,7 @@ public class GameManager {
     /**
      * This constructor is for testing purposes.
      */
-    GameManager(Level l, HashMap<String,Position> adversaryPositions, HashMap<String,
+    GameManager(Level l, HashMap<String, Position> adversaryPositions, HashMap<String,
         Position> playerOrigins) {
         this.l = l;
         this.currentGameState = new GameState(l, playerOrigins, adversaryPositions);
@@ -49,38 +49,41 @@ public class GameManager {
 
     }
 
-    public GameState getCurrentGameState(){
+    public GameState getCurrentGameState() {
         return this.currentGameState;
     }
 
     /**
-     * Register between 1 and 4 players. The order of registration determines the order in which they take turns.
+     * Register between 1 and 4 players. The order of registration determines the order in which they
+     * take turns.
+     *
      * @throws IOException when the input is invalid
      */
     public void registerPlayers() throws IOException {
         ArrayList<String> usernames = new ArrayList<>();
 
-       BufferedReader inPlayers = new BufferedReader(new InputStreamReader(System.in));
-       while(inPlayers.readLine() != null) {
-           String username = inPlayers.readLine();
-           usernames.add(username);
-       }
-       if (usernames.size() > 4 || usernames.size() < 1) {
-           throw new IOException("Cannot register this number of players.");
-       }
-       playerUsernames = usernames;
+        BufferedReader inPlayers = new BufferedReader(new InputStreamReader(System.in));
+        while (inPlayers.readLine() != null) {
+            String username = inPlayers.readLine();
+            usernames.add(username);
+        }
+        if (usernames.size() > 4 || usernames.size() < 1) {
+            throw new IOException("Cannot register this number of players.");
+        }
+        playerUsernames = usernames;
 
     }
 
     /**
      * Register adversaries with their usernames.
+     *
      * @throws IOException when the input is invalid
      */
     public void registerAdversaries() throws IOException {
         ArrayList<String> usernames = new ArrayList<>();
 
         BufferedReader inPlayers = new BufferedReader(new InputStreamReader(System.in));
-        while(inPlayers.readLine() != null) {
+        while (inPlayers.readLine() != null) {
             String username = inPlayers.readLine();
             usernames.add(username);
         }
@@ -92,40 +95,43 @@ public class GameManager {
      * Starts the game. Updates the current game state, player positions, and adversary positions.
      */
     public void startGame() {
-        currentGameState = new GameState(l,playerUsernames.size(), adversaryUsernames.size() );
+        currentGameState = new GameState(l, playerUsernames.size(), adversaryUsernames.size());
         playerIDpositions = currentGameState.getPlayerIDPositions();
         adversaryIDpositions = currentGameState.getAdversaryIDPositions();
     }
 
     /**
-     * Sends a modified version of the current game state to each player.
-     * For now, we are sending a list of visible tiles.
+     * Sends a modified version of the current game state to each player. For now, we are sending a
+     * list of visible tiles.
      */
     public void sendCurrentState() {
 
         HashMap<String, Position> playerPositionsMap = currentGameState.getPlayerPositionsMap();
-        for (Position p: playerPositionsMap.values()) {
+        for (Position p : playerPositionsMap.values()) {
             ArrayList<Position> visibleTiles = RuleChecker.calculatePlayerVisibleTiles(p);
-            for (int i=0;i<visibleTiles.size();i++) {
+            for (int i = 0; i < visibleTiles.size(); i++) {
                 visibleTiles.get(i).print();
             }
         }
     }
 
     /**
-     * Receives a move request from a player, and updates that player's position if the move is valid.
-     * @param pos represents the position the player is trying to move to
+     * Receives a move request from a player, and updates that player's position if the move is
+     * valid.
+     *
+     * @param pos    represents the position the player is trying to move to
      * @param player represents the player that is trying to move
      */
     public void receiveMove(Position pos, Player player) {
-        if (RuleChecker.isValidPlayerMove(pos,player, playerIDpositions)){
-            currentGameState.updatePlayerState(player.getId()-10, pos);
+        if (RuleChecker.isValidPlayerMove(pos, player, playerIDpositions)) {
+            currentGameState.updatePlayerState(player.getId() - 10, pos);
         }
     }
 
     /**
-     * Requests a move from the next player.
-     * This function will be implemented once networking is incorporated into our design.
+     * Requests a move from the next player. This function will be implemented once networking is
+     * incorporated into our design.
+     *
      * @param player represents the player whose turn it is to move
      * @return a position representing where the next player wants to move
      */
@@ -135,19 +141,19 @@ public class GameManager {
     }
 
 
-
     /**
      * Determines the interaction result.
+     *
      * @param player represents the player that is interacting
      */
     public void interact(Player player) {
         int result = RuleChecker.determinePlayerInteraction(player,
-                adversaryIDpositions, playerIDpositions, currentGameState.getL().getExitStatus());
-        if (result ==0) {
+            adversaryIDpositions, playerIDpositions, currentGameState.getL().getExitStatus());
+        if (result == 0) {
             currentGameState.setExitStatus(true);
-        } else if (result ==2) {
-            this.levelEnd=true;
-        } else if(result ==3) {
+        } else if (result == 2) {
+            this.levelEnd = true;
+        } else if (result == 3) {
             GameState.ejectPlayer(player);
         }
 
@@ -155,6 +161,7 @@ public class GameManager {
 
     /**
      * Gets visible area to the Player in the given Position
+     *
      * @param pos Player position
      * @return int[][] representing visible area
      */
@@ -162,13 +169,14 @@ public class GameManager {
         int[][] visibleArea = new int[5][5];
         int posX = pos.getx();
         int posY = pos.gety();
-        for(int i = posX - 2; i < posX + 3; i++){
-            for(int j = posY - 2; j < posY + 3; j++) {
-                if(i > 0 && j > 0 ) {
+        for (int i = posX - 2; i < posX + 3; i++) {
+            for (int j = posY - 2; j < posY + 3; j++) {
+                if (i > 0 && j > 0) {
                     if (levelLayout.containsKey((new Position(i, j)))) {
-                        visibleArea[i-posX+2][j-posY+2] = levelLayout.get(new Position(i, j));
+                        visibleArea[i - posX + 2][j - posY + 2] = levelLayout
+                            .get(new Position(i, j));
                     } else {
-                        visibleArea[i-posX+2][j-posY+2] =0;
+                        visibleArea[i - posX + 2][j - posY + 2] = 0;
                     }
                 }
             }
@@ -182,17 +190,17 @@ public class GameManager {
         int posX = pos.getx();
         int posY = pos.gety();
         Position exit = l.getExit();
-        if(!isExitOpen) {
+        if (!isExitOpen) {
             Position key = l.getKey();
             int keyX = key.getx();
             int keyY = key.gety();
-            if(keyX >= posX - 2 && keyX <= posX + 2 && keyY >= posY - 2 && keyY <= posY + 2) {
+            if (keyX >= posX - 2 && keyX <= posX + 2 && keyY >= posY - 2 && keyY <= posY + 2) {
                 result.put("key", key);
             }
         }
         int exitX = exit.getx();
         int exitY = exit.gety();
-        if(exitX >= posX - 2 && exitX <= posX + 2 && exitY >= posY - 2 && exitY <= posY + 2) {
+        if (exitX >= posX - 2 && exitX <= posX + 2 && exitY >= posY - 2 && exitY <= posY + 2) {
             result.put("exit", exit);
         }
 
@@ -211,13 +219,13 @@ public class GameManager {
         int posX = pos.getx();
         int posY = pos.gety();
         //Adds visible players from given Position
-        for(int i = 0; i < playerPos.size(); i++) {
+        for (int i = 0; i < playerPos.size(); i++) {
             int currX = playerPos.get(i).getx();
             int currY = playerPos.get(i).gety();
-            if(currX >= posX - 2 && currX <= posX + 2 && currY >= posY - 2 && currY <= posY + 2) {
+            if (currX >= posX - 2 && currX <= posX + 2 && currY >= posY - 2 && currY <= posY + 2) {
                 String name = "";
-                for(Entry<String, Position> e: playerPosMap.entrySet()) {
-                    if(playerPos.get(i).equals(e.getValue())) {
+                for (Entry<String, Position> e : playerPosMap.entrySet()) {
+                    if (playerPos.get(i).equals(e.getValue())) {
                         name = e.getKey();
                     }
                 }
@@ -225,13 +233,13 @@ public class GameManager {
             }
         }
         //Adds visible adversaries from given Position
-        for(int i = 0; i < adversaryPos.size(); i++) {
+        for (int i = 0; i < adversaryPos.size(); i++) {
             int currX = adversaryPos.get(i).getx();
             int currY = adversaryPos.get(i).gety();
-            if(currX >= posX - 2 && currX <= posX + 2 && currY >= posY - 2 && currY <= posY + 2) {
+            if (currX >= posX - 2 && currX <= posX + 2 && currY >= posY - 2 && currY <= posY + 2) {
                 String name = "";
-                for(Entry<String, Position> e: adversaryPosMap.entrySet()) {
-                    if(adversaryPos.get(i).equals(e.getValue())) {
+                for (Entry<String, Position> e : adversaryPosMap.entrySet()) {
+                    if (adversaryPos.get(i).equals(e.getValue())) {
                         name = e.getKey();
                     }
                 }
@@ -248,11 +256,13 @@ public class GameManager {
 
     }
 
-    public int interactAfterMove(String name, Position curr){
+    public int interactAfterMove(String name, Position curr) {
         HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
         ArrayList<Position> adversaryPositions = currentGameState.getAdversaryPositions();
         boolean exitStatus = currentGameState.getExitStatus();
-        int result = RuleChecker.determinePlayerInteractionTest(name, curr, adversaryPositions, playerPosMap, exitStatus);
+        int result = RuleChecker
+            .determinePlayerInteractionTest(name, curr, adversaryPositions, playerPosMap,
+                exitStatus);
 //        this.currentGameState.updatePlayerState(name, result,curr);
         return result;
     }
@@ -261,13 +271,53 @@ public class GameManager {
         HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
         ArrayList<Position> adversaryPositions = currentGameState.getAdversaryPositions();
         boolean exitStatus = currentGameState.getExitStatus();
-        int result =  RuleChecker.determinePlayerInteractionTest(name, move, adversaryPositions, playerPosMap, exitStatus);
-        this.currentGameState.updatePlayerState(name, result,move);
+        int result = RuleChecker
+            .determinePlayerInteractionTest(name, move, adversaryPositions, playerPosMap,
+                exitStatus);
+        this.currentGameState.updatePlayerState(name, result, move);
     }
 
+    public int[][] generatePlayerUpdate(HashMap<String, Position> playerPositionsMap,
+        HashMap<String, Position> adversaryPositionsMap,
+        HashMap<String, Position> objectPositionsMap, int[][] visibleTiles) {
 
+        HashMap<String, Position> surroundingPositions = new HashMap<>();
+        surroundingPositions.putAll(playerPositionsMap);
+        surroundingPositions.putAll(adversaryPositionsMap);
+        surroundingPositions.putAll(objectPositionsMap);
+        for (String s : surroundingPositions.keySet()) {
+            if (s.equals("key")) {
+                Position key = surroundingPositions.get(s);
+                int keyX = key.getx();
+                int keyY = key.gety();
+                visibleTiles[keyX][keyY] = 7;
+            }
+            if (s.equals("exit")) {
+                Position exit = surroundingPositions.get(s);
+                int exitX = exit.getx();
+                int exitY = exit.gety();
+                visibleTiles[exitX][exitY] = 8;
+            }
+            if (playerUsernames.contains(s)) {
+                Position player = surroundingPositions.get(s);
+                int playerX = player.getx();
+                int playerY = player.gety();
+                visibleTiles[playerX][playerY] = 3;
+            }
+            if (adversaryUsernames.contains(s)) {
+                Position adversary = surroundingPositions.get(s);
+                int adversaryX = adversary.getx();
+                int adversaryY = adversary.gety();
+                visibleTiles[adversaryX][adversaryY] = 9;
+            }
+        }
+        return visibleTiles;
 
-
-
-
+    }
 }
+
+
+
+
+
+

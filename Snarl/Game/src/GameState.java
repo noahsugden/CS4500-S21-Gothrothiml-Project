@@ -2,6 +2,8 @@
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import javax.print.attribute.HashDocAttributeSet;
 
 /**
  * This class represents a game state.
@@ -27,11 +29,14 @@ public class GameState {
     HashMap<String, Position> ghostPositionsMap = new HashMap<>();
     HashMap<Integer,Position> playerIDPositions = new HashMap<>();
     HashMap<Integer,Position> adversaryIDPositions = new HashMap<>();
+    HashMap<String, Position> adversaryPositionsMap = new HashMap<>();
+    HashMap<String, Position> objectPositionsMap = new HashMap<>();
     int[][] out;
 
 
     boolean exitStatus;
     boolean playerArrived;
+
 
 
 
@@ -113,6 +118,22 @@ public class GameState {
         adversaryPositions.addAll(zombiePositionsMap.values());
         this.exitStatus = false;
 
+    }
+
+    public GameState(HashMap<String, Position> playerPositionsMap,
+        HashMap<String, Position> adversaryPositionsMap, Level l) {
+        this.playerPositionsMap = playerPositionsMap;
+        this.adversaryPositionsMap = adversaryPositionsMap;
+        this.l = l;
+        initializeObjectsMap();
+    }
+
+    public HashMap<String, Position> getAdversaryPositionsMap() {
+        return adversaryPositionsMap;
+    }
+
+    public HashMap<String, Position> getObjectPositionsMap() {
+        return objectPositionsMap;
     }
 
     /**
@@ -329,11 +350,13 @@ public class GameState {
         //if the player interacts with a key
         if (l.getLevelLayout().get(newP) == 7) {
             exitStatus = true;
+            objectPositionsMap.remove("key");
 
         } // if the player interacts with an exit
         else if (l.getLevelLayout().get(newP) == 8) {
             //call the rule checker to determine if the level has ended
             playerArrived = exitStatus;
+
         }
         if(adversaryPositions.contains(newP)) {
             players.remove(curr);
@@ -349,6 +372,7 @@ public class GameState {
             this.exitStatus = true;
             this.playerPositionsMap.remove(name);
             this.playerPositionsMap.put(name, move);
+            objectPositionsMap.remove("key");
         } else {
             this.playerPositionsMap.remove(name);
             this.playerPositionsMap.put(name, move);
@@ -407,6 +431,18 @@ public class GameState {
         }
         l.print2D(out);
 
+    }
+
+    public void initializeObjectsMap() {
+        HashMap<Position, Integer> levelLayout = l.getLevelLayout();
+        for(Entry<Position, Integer> e : levelLayout.entrySet()) {
+            if(levelLayout.get(e.getValue()) == 7) {
+                objectPositionsMap.put("key", e.getKey());
+            }
+            if(levelLayout.get(e.getValue()) == 8) {
+                objectPositionsMap.put("exit", e.getKey());
+            }
+        }
     }
 
 }
