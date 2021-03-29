@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 /**
  * This class represents an Adversary with its respective id number, position in the game,
  * and the number of cardinalMoves it can make.
@@ -6,7 +8,13 @@ public class Adversary {
     private int id;
     private Position p ;
     private int cardinalMoves;
+    String type;
 
+
+    public Adversary(HashMap<Position, Integer> levelLayout, HashMap<String, Position> playerPositions,
+                     HashMap<String, Position> adversaryPositions) {
+
+    }
 
     /**
      * Constructor for an Adversary that takes in the Adversary's registration order.
@@ -26,6 +34,9 @@ public class Adversary {
     public Adversary(Position p, int cardinalMoves ) {
         this.p = p;
         this.cardinalMoves = cardinalMoves;
+    }
+
+    protected Adversary() {
     }
 
     /**

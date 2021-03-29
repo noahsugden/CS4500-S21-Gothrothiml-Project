@@ -284,6 +284,8 @@ public class RuleChecker {
 
     }
 
+
+
     /**
      * Calculate tiles that are 1 cardinal move from the current tile
      * @param pos represents the current position

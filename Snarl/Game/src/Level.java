@@ -25,6 +25,7 @@ public class Level {
 
     //true for unlocked
   boolean exitStatus;
+  ArrayList<HashMap<Position, Integer>> roomLayouts = new ArrayList<>();
 
 
   //this is an example level data of three rooms, two hallways, an exit and a key
@@ -276,6 +277,10 @@ public class Level {
     this.exit = e;
     this.putLevelLayout();
     this.fill2DArray();
+    for (int i = 0; i < r.size(); i++) {
+      HashMap<Position, Integer> curr = r.get(i).getRoomLayout();
+      roomLayouts.add(curr);
+    }
   }
 
 
@@ -291,6 +296,10 @@ public class Level {
     this.hallways = new ArrayList<>();
     this.putLevelLayout();
     this.fill2DArray();
+    for (int i = 0; i < rooms.size(); i++) {
+      HashMap<Position, Integer> curr = rooms.get(i).getRoomLayout();
+      roomLayouts.add(curr);
+    }
   }
 
   /**
@@ -307,6 +316,10 @@ public class Level {
     hallways.add(h);
     this.putLevelLayout();
     this.fill2DArray();
+    for (int i = 0; i < rooms.size(); i++) {
+      HashMap<Position, Integer> curr = rooms.get(i).getRoomLayout();
+      roomLayouts.add(curr);
+    }
   }
 
   public Position getKey() {
@@ -565,6 +578,9 @@ public class Level {
     return temp;
   }
 
+  public ArrayList<HashMap<Position, Integer>> getRoomLayouts() {
+    return this.roomLayouts;
+  }
 
   /**
    * Gets the 2D Array representing our level layout.
