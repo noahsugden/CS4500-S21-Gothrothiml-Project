@@ -1,9 +1,12 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Scanner;
 
 // Unit tests for our GameManager are pointless at this point, since it is very likely that it will
 // change. Once we incorporate networking, we will implement the unit tests.
@@ -18,22 +21,58 @@ import java.util.Map.Entry;
  */
 public class GameManager {
 
-    ArrayList<String> playerUsernames;
+
+    ArrayList<String> playerUsernames = new ArrayList<>();
     ArrayList<String> adversaryUsernames;
+    ArrayList<String> expelledPlayers = new ArrayList<>();
     GameState currentGameState;
     Level l;
     HashMap<Integer, Position> playerIDpositions;
     HashMap<Integer, Position> adversaryIDpositions;
+    static HashMap<String, Integer> playerExitCount;
+    static HashMap<String, Integer> playerKeyCount;
     boolean levelEnd;
     int turnNumber;
     HashMap<Position, Integer> levelLayout;
     RuleChecker ruleChecker;
+    Integer zombieNumber;
+    Integer ghostNumber;
+    ArrayList<Zombie> zombies = new ArrayList<>();
+    ArrayList<Ghost> ghosts = new ArrayList<>();
+    ArrayList<Player> players = new ArrayList<>();
+    Integer currentLevelIndex;
 
+    static String fileName = "snarl.levels";
+    static Integer playerNumber =1;
+    static Integer startLevel =1;
+    static boolean observe = false;
+    static ArrayList<Level> levels = new ArrayList<>();
+    static Integer natural;
     /**
      * This constructor takes in the current level of the game.
      */
     GameManager(Level l) {
         this.l = l;
+    }
+
+    GameManager(Integer currentLevelIndex) {
+        this.zombieNumber = currentLevelIndex/2 +1;
+        this.ghostNumber = (currentLevelIndex-1)/2;
+        for (int i=0;i<zombieNumber;i++) {
+            Zombie temp = new Zombie(playerNumber+i);
+            zombies.add(temp);
+        }
+        for (int i=0;i<ghostNumber;i++) {
+            Ghost temp = new Ghost(playerNumber+zombieNumber+i);
+            ghosts.add(temp);
+        }
+        for (int i=0;i<playerNumber;i++) {
+            Player temp = new Player(i);
+            players.add(temp);
+        }
+        generateInitialPositions(currentLevelIndex);
+        this.currentLevelIndex = currentLevelIndex;
+        RuleChecker ruleChecker = new RuleChecker(levels.get(currentLevelIndex));
     }
 
     /**
@@ -93,11 +132,115 @@ public class GameManager {
 
     /**
      * Starts the game. Updates the current game state, player positions, and adversary positions.
-     */
+
     public void startGame() {
         currentGameState = new GameState(l, playerUsernames.size(), adversaryUsernames.size());
         playerIDpositions = currentGameState.getPlayerIDPositions();
         adversaryIDpositions = currentGameState.getAdversaryIDPositions();
+    }
+     */
+
+    public void startLocalGame(){
+        Scanner sc = new Scanner(System.in);
+        for (int i=1; i<playerNumber+1;i++) {
+            System.out.print("Player#"+i+": Please enter your username.");
+            String username = sc.nextLine();
+            playerUsernames.add(username);
+        }
+        GameState initialGameState = new GameState(playerIDpositions, adversaryIDpositions,
+                levels.get(currentLevelIndex), zombieNumber );
+        currentGameState = initialGameState;
+        runGame();
+
+    }
+
+    public void runGame() {
+        Scanner sc = new Scanner(System.in);
+        while(true) {
+            for (int i=0; i<playerUsernames.size();i++) {
+                String username = playerUsernames.get(i);
+                if (!expelledPlayers.contains(username)) {
+                    Position current = currentGameState.getPlayerPositionsMap().get(String.valueOf(i));
+                    System.out.print(username+", this is your current game state.\n");
+                    printUpdate(current);
+                    System.out.print("Please enter the x position of your next move:");
+                    String moveX = sc.nextLine();
+                    Integer x = Integer.parseInt(moveX);
+                    System.out.print("Please enter the y position of your next move:");
+                    String moveY = sc.nextLine();
+                    Integer y = Integer.parseInt(moveY);
+                    if (RuleChecker.isValidPlayerMoveTest("", current, new Position(x,y),
+                            currentGameState.getPlayerPositionsMap())) {
+                        ArrayList<Position> adversaryPositions =
+                                currentGameState.fromMapToArrayList(currentGameState.getAdversaryPositionsMap());
+                        Integer result = RuleChecker.determinePlayerInteractionTest(String.valueOf(i),new Position(x, y), adversaryPositions, currentGameState.getPlayerPositionsMap(), currentGameState.exitStatus );
+                        if (result ==3) {
+                            expelledPlayers.add(username);
+                            System.out.print("Player "+username + " was expelled.");
+                        }
+                        if (result ==0) {
+                            System.out.print("Player "+username + " found the key.");
+                            if (playerKeyCount.containsKey(username)) {
+                                Integer temp = playerKeyCount.get(username);
+                                playerKeyCount.remove(username);
+                                playerKeyCount.put(username, temp+1);
+                            } else {
+                                playerKeyCount.put(username, 1);
+                            }
+                        }
+                        if (result ==2) {
+                            System.out.print("Player "+username + " exited.");
+                            if (playerExitCount.containsKey(username)) {
+                                Integer temp = playerExitCount.get(username);
+                                playerExitCount.remove(username);
+                                playerExitCount.put(username, temp+1);
+                            } else {
+                                playerExitCount.put(username, 1);
+                            }
+                            if (currentLevelIndex !=natural) {
+                                currentLevelIndex +=1;
+                                expelledPlayers = new ArrayList<>();
+                                startLocalGame();
+                            } else {
+                                System.out.print("You have won the game!");
+                                endGame();
+                            }
+                        }
+                        this.currentGameState.updatePlayerState(String.valueOf(i), result,new Position(x, y));
+                    }
+                    printUpdate(new Position(x,y));
+                  if (expelledPlayers.size() == playerNumber) {
+                      System.out.print("All players are ejected. The game is over. You failed in Level" + currentLevelIndex);
+                      endGame();
+                      break;
+
+                  }
+                }
+            }
+        }
+    }
+
+    public void endGame() {
+        System.out.print(playerUsernames.get(0) +" exited"+ playerExitCount.get(playerUsernames.get(0))+ " times.");
+        System.out.print(playerUsernames.get(0) +" found the key"+ playerKeyCount.get(playerUsernames.get(0))+ " times.");
+    }
+
+    public void printUpdate(Position current) {
+        int[][] visibleTiles = generatePlayerUpdate(current);
+        l.print2D(visibleTiles);
+        HashMap<String,Position> actorMap = getVisibleActors(current);
+        printInformation(actorMap);
+    }
+    public void printInformation(HashMap<String,Position> actorMap) {
+        for(String s:actorMap.keySet()) {
+            Integer index = Integer.parseInt(s);
+            Position current = actorMap.get(index);
+            if(index>=playerNumber && index<playerNumber+zombieNumber) {
+                System.out.print("The adversary at ("+ current.getx()+","+current.gety() +") is a zombie.");
+            } else if (index >=playerNumber+zombieNumber) {
+                System.out.print("The adversary at ("+ current.getx()+","+current.gety() +") is a ghost.");
+            }
+        }
     }
 
     /**
@@ -121,12 +264,13 @@ public class GameManager {
      *
      * @param pos    represents the position the player is trying to move to
      * @param player represents the player that is trying to move
-     */
+
     public void receiveMove(Position pos, Player player) {
         if (RuleChecker.isValidPlayerMove(pos, player, playerIDpositions)) {
             currentGameState.updatePlayerState(player.getId() - 10, pos);
         }
     }
+     */
 
     /**
      * Requests a move from the next player. This function will be implemented once networking is
@@ -145,7 +289,7 @@ public class GameManager {
      * Determines the interaction result.
      *
      * @param player represents the player that is interacting
-     */
+
     public void interact(Player player) {
         int result = RuleChecker.determinePlayerInteraction(player,
             adversaryIDpositions, playerIDpositions, currentGameState.getL().getExitStatus());
@@ -158,6 +302,7 @@ public class GameManager {
         }
 
     }
+     */
 
     /**
      * Gets visible area to the Player in the given Position
@@ -210,7 +355,7 @@ public class GameManager {
 
     public HashMap<String, Position> getVisibleActors(Position pos) {
         ArrayList<Position> playerPos = new ArrayList<>();
-        HashMap<String, Position> adversaryPosMap = currentGameState.getZombiePositionsMap();
+        HashMap<String, Position> adversaryPosMap = currentGameState.getAdversaryPositionsMap();
         HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
         ArrayList<Position> adversaryPos = new ArrayList<>();
         playerPos.addAll(playerPosMap.values());
@@ -277,13 +422,12 @@ public class GameManager {
         this.currentGameState.updatePlayerState(name, result, move);
     }
 
-    public int[][] generatePlayerUpdate(HashMap<String, Position> playerPositionsMap,
-        HashMap<String, Position> adversaryPositionsMap,
-        HashMap<String, Position> objectPositionsMap, int[][] visibleTiles) {
-
+    public int[][] generatePlayerUpdate(Position position) {
+        HashMap<String, Position> actorPositionsMap = getVisibleActors(position);
+        HashMap<String, Position> objectPositionsMap = currentGameState.getObjectPositionsMap();
+        int[][] visibleTiles = getVisibleArea(position);
         HashMap<String, Position> surroundingPositions = new HashMap<>();
-        surroundingPositions.putAll(playerPositionsMap);
-        surroundingPositions.putAll(adversaryPositionsMap);
+        surroundingPositions.putAll(actorPositionsMap);
         surroundingPositions.putAll(objectPositionsMap);
         for (String s : surroundingPositions.keySet()) {
             if (s.equals("key")) {
@@ -298,13 +442,13 @@ public class GameManager {
                 int exitY = exit.gety();
                 visibleTiles[exitX][exitY] = 8;
             }
-            if (playerUsernames.contains(s)) {
+            if (Integer.parseInt(s) <playerNumber) {
                 Position player = surroundingPositions.get(s);
                 int playerX = player.getx();
                 int playerY = player.gety();
                 visibleTiles[playerX][playerY] = 3;
             }
-            if (adversaryUsernames.contains(s)) {
+            if (Integer.parseInt(s)>=playerNumber) {
                 Position adversary = surroundingPositions.get(s);
                 int adversaryX = adversary.getx();
                 int adversaryY = adversary.gety();
@@ -313,6 +457,99 @@ public class GameManager {
         }
         return visibleTiles;
 
+    }
+
+    public static Level readLevel(String json) throws JSONException {
+        JSONObject level = new JSONObject(json);
+        Level l = TestLevel.getLevel(level);
+        return l;
+    }
+
+    public static ArrayList<Level> generateLevels(String fileName) throws IOException {
+        ArrayList<Level> levels = new ArrayList<>();
+        String currentPath = System.getProperty("user.dir");
+        File snarlLevels = new File(currentPath+"\\"+fileName);
+        FileReader fr = new FileReader(snarlLevels);
+        BufferedReader bufferedReader = new BufferedReader(fr);
+        StringBuilder currentLevel = new StringBuilder();
+        natural = Integer.parseInt(bufferedReader.readLine());
+        String temp = bufferedReader.readLine();
+        while (temp != null) {
+            currentLevel.append(temp);
+            String tempLevel = currentLevel.toString();
+            try {
+                temp = bufferedReader.readLine();
+                Level level = readLevel(tempLevel);
+                levels.add(level);
+                currentLevel = new StringBuilder();
+            } catch (JSONException ignored) {
+
+            }
+        }
+
+        return levels;
+    }
+
+    public void generateInitialPositions(Integer currentLevelNumber){
+        Level currentLevel = levels.get(currentLevelNumber);
+        HashMap<Position, Integer> levelLayout = currentLevel.getLevelLayout();
+        ArrayList<Position> traversables = new ArrayList<>();
+        for (Position p: levelLayout.keySet()) {
+            Integer tileType = levelLayout.get(p);
+            if (tileType ==2) {
+                traversables.add(p);
+            }
+        }
+        for (int i=0;i<players.size();i++) {
+            Random r = new Random();
+            int high = traversables.size();
+            int result = r.nextInt(high);
+            playerIDpositions.put(players.get(i).getId(),traversables.get(result) );
+            traversables.remove(result);
+        }
+        for (int i=0;i<zombies.size();i++) {
+            Random r = new Random();
+            int high = traversables.size();
+            int result = r.nextInt(high);
+            zombies.get(i).setPosition(traversables.get(result));
+            adversaryIDpositions.put(zombies.get(i).getId(), traversables.get(result));
+            traversables.remove(result);
+        }
+        for (int i=0;i<ghosts.size();i++) {
+            Random r = new Random();
+            int high = traversables.size();
+            int result = r.nextInt(high);
+            ghosts.get(i).setPosition(traversables.get(result));
+            adversaryIDpositions.put(ghosts.get(i).getId(), traversables.get(result));
+            traversables.remove(result);
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        for (int i=0;i<args.length;i++) {
+            String argument = args[i];
+            if (argument.equals("--levels")) {
+                fileName = args[i+1];
+                levels = generateLevels(fileName);
+            } else if (argument.equals("--players")) {
+                playerNumber = Integer.parseInt(args[i+1]);
+                if (playerNumber < 1 ||playerNumber >4) {
+                    System.out.print("Not valid player number.");
+                    return;
+                }
+            } else if (argument.equals("--start")) {
+                startLevel = Integer.parseInt(args[i+1]);
+                if (startLevel > levels.size()|| startLevel <1) {
+                    System.out.print("Not valid start number.");
+                    return;
+                }
+            } else if (argument.equals("--observe")) {
+                playerNumber = 1;
+                observe = true;
+            }
+        }
+        playerExitCount = new HashMap<>();
+        playerKeyCount = new HashMap<>();
     }
 }
 

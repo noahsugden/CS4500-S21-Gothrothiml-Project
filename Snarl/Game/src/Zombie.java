@@ -21,6 +21,10 @@ public class Zombie extends Adversary {
 
   }
 
+  public void setPosition(Position p) {
+    this.currentPosition = p;
+  }
+
   public void updatePosition() {
     double distance = 0;
     String name = "";

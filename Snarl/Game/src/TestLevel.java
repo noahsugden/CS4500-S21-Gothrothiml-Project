@@ -19,8 +19,7 @@ import java.util.Scanner;
  */
 public class TestLevel {
 
-  static ArrayList<Room> roomList = new ArrayList<>();
-  static ArrayList<Hallway> hallwayList = new ArrayList<>();
+
 
 
   /**
@@ -30,6 +29,8 @@ public class TestLevel {
    * @throws JSONException when the json object is not valid
    */
   public static Level getLevel(JSONObject level) throws JSONException{
+    ArrayList<Room> roomList = new ArrayList<>();
+    ArrayList<Hallway> hallwayList = new ArrayList<>();
     JSONObject key;
     JSONObject exit;
     JSONObject temp;
@@ -276,17 +277,6 @@ public class TestLevel {
     return result;
   }
 
-  public static void main(String[] args) throws JSONException {
-    Scanner sc = new Scanner(System.in);
-    StringBuilder sb = new StringBuilder();
-    while (sc.hasNextLine()) {
-      String curr = sc.nextLine();
-      sb.append(curr);
-    }
-    String input = sb.toString();
 
-    JSONObject result = readLevel(input);
-    System.out.print(result.toString());
-  }
 
 }

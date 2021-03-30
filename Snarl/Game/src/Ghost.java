@@ -29,6 +29,10 @@ public class Ghost extends Adversary {
     this.currentPosition = currentPosition;
 
   }
+  public void setPosition(Position p) {
+    this.currentPosition = p;
+  }
+
 
   public void updatePosition() {
     double distance = 0;

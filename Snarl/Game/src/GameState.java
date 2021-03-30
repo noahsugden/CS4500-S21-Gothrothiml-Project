@@ -2,6 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import javax.print.attribute.HashDocAttributeSet;
 
@@ -106,9 +107,9 @@ public class GameState {
         playerPositions = fromMapToArrayList(playerPositionsMap);
         zombiePositions.putAll(ghostPositions);
         adversaryPositions.addAll(zombiePositions.values());
-
-
     }
+
+
 
     GameState(Level l, HashMap<String, Position> playerPositionsMap,
         HashMap<String,Position> adversaryPositionsMap) {
@@ -124,6 +125,15 @@ public class GameState {
         HashMap<String, Position> adversaryPositionsMap, Level l) {
         this.playerPositionsMap = playerPositionsMap;
         this.adversaryPositionsMap = adversaryPositionsMap;
+        this.l = l;
+        initializeObjectsMap();
+    }
+
+
+    public GameState(HashMap<Integer,Position> playerIDpositions, HashMap<Integer,Position>
+            adversaryIDpositions, Level level, Integer zombieNumber) {
+        this.playerPositionsMap = transformHashMap(playerIDpositions);
+        this.adversaryPositionsMap = transformHashMap(adversaryIDpositions);
         this.l = l;
         initializeObjectsMap();
     }
@@ -147,6 +157,14 @@ public class GameState {
             results.add(p);
         }
         return results;
+    }
+
+    public HashMap<String, Position> transformHashMap(HashMap<Integer, Position> intMap) {
+        HashMap<String, Position> result = new HashMap<>();
+        for (Integer i: intMap.keySet()) {
+            result.put(i.toString(), intMap.get(i));
+        }
+        return result;
     }
 
     public boolean getExitStatus() {
