@@ -15,7 +15,7 @@ public class Player {
      *
      */
     public Player(int id) {
-        this.id = id +10;
+        this.id = id;
     }
 
     /**

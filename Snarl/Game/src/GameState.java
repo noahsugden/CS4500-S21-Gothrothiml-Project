@@ -134,7 +134,7 @@ public class GameState {
             adversaryIDpositions, Level level, Integer zombieNumber) {
         this.playerPositionsMap = transformHashMap(playerIDpositions);
         this.adversaryPositionsMap = transformHashMap(adversaryIDpositions);
-        this.l = l;
+        this.l = level;
         initializeObjectsMap();
     }
 
@@ -454,10 +454,10 @@ public class GameState {
     public void initializeObjectsMap() {
         HashMap<Position, Integer> levelLayout = l.getLevelLayout();
         for(Entry<Position, Integer> e : levelLayout.entrySet()) {
-            if(levelLayout.get(e.getValue()) == 7) {
+            if(levelLayout.get(e.getKey()) == 7) {
                 objectPositionsMap.put("key", e.getKey());
             }
-            if(levelLayout.get(e.getValue()) == 8) {
+            if(levelLayout.get(e.getKey()) == 8) {
                 objectPositionsMap.put("exit", e.getKey());
             }
         }

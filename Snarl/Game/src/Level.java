@@ -505,13 +505,15 @@ public class Level {
           chars[i] = 'A';
         }
         else if (chars[i] == ',') {
-          chars[i] = (char) 0;
+          chars[i] = ' ';
         }
       }
       String lastString = new String(chars);
       System.out.println(lastString);
     }
   }
+
+
 
 
   /**
