@@ -188,6 +188,7 @@ public class GameManager {
                         Integer result = ruleChecker.determinePlayerInteractionTest(String.valueOf(0),
                             new Position(x, y), adversaryPositions, currentGameState.getPlayerPositionsMap(),
                             currentGameState.exitStatus );
+                        System.out.print(result);
                         if (result ==3) {
                             expelledPlayers.add(username);
                             System.out.print("Player "+username + " was expelled.");
@@ -390,7 +391,6 @@ public class GameManager {
         HashMap<String, Position> adversaryPosMap = currentGameState.getAdversaryPositionsMap();
         HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
         ArrayList<Position> adversaryPos = new ArrayList<>();
-        System.out.print(playerPosMap.values().size());
         playerPos.addAll(playerPosMap.values());
         adversaryPos.addAll(adversaryPosMap.values());
         HashMap<String, Position> result = new HashMap<>();
@@ -411,9 +411,7 @@ public class GameManager {
             }
         }
         //Adds visible adversaries from given Position
-        System.out.print(adversaryPos.size());
         for (Position p : adversaryPosMap.values()) {
-            p.print();
             int currX = p.getx();
             int currY = p.gety();
             if (currX >= posX - 2 && currX <= posX + 2 && currY >= posY - 2 && currY <= posY + 2) {
@@ -467,7 +465,6 @@ public class GameManager {
         Position player = surroundingPositions.get(String.valueOf(0));
         int playerX = player.getx();
         int playerY = player.gety();
-        player.print();
         visibleTiles[2][2] = 3;
         for (String s : surroundingPositions.keySet()) {
             if (s.equals("key")) {
