@@ -420,6 +420,14 @@ public class GameState {
         }
     }
 
+    public void updateAdversaryMap(String s, Position p) {
+        adversaryPositionsMap.remove(s);
+        adversaryPositionsMap.put(s, p);
+        if (playerPositionsMap.containsValue(p)) {
+            playerPositionsMap.remove(String.valueOf(0));
+        }
+    }
+
     /**
      * Renders the current game state with one player and one adversary using their IDs.
      * @param pID represents the Player ID

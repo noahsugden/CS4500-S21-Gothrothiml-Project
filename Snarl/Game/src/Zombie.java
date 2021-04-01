@@ -10,6 +10,7 @@ public class Zombie extends Adversary {
   public Zombie(int id) {
     super(id);
     this.cardinalMoves = 1;
+
   }
 
   public Zombie(HashMap<Position, Integer> levelLayout, HashMap<String, Position> playerPositions,
@@ -21,11 +22,24 @@ public class Zombie extends Adversary {
 
   }
 
+  public void setMaps(GameState gs) {
+    this.playerPositions = gs.getPlayerPositionsMap();
+    this.adversaryPositions = gs.getAdversaryPositionsMap();
+    this.levelLayout = gs.getL().getLevelLayout();
+  }
+
   public void setPosition(Position p) {
     this.currentPosition = p;
   }
 
+
+  @Override
+  public Position getP() {
+    return this.currentPosition;
+  }
+
   public void updatePosition() {
+    this.playerPositions = GameManager.currentGameState.getPlayerPositionsMap();
     double distance = 0;
     String name = "";
     for (String s : playerPositions.keySet()) {

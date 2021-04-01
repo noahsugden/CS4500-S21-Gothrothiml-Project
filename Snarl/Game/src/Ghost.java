@@ -29,12 +29,24 @@ public class Ghost extends Adversary {
     this.currentPosition = currentPosition;
 
   }
+
+  @Override
+  public Position getP() {
+    return this.currentPosition;
+  }
+
   public void setPosition(Position p) {
     this.currentPosition = p;
   }
 
+  public void setMaps(GameState gs) {
+    this.playerPositions = gs.getPlayerPositionsMap();
+    this.adversaryPositions = gs.getAdversaryPositionsMap();
+    this.l = gs.getL();
+  }
 
   public void updatePosition() {
+    this.playerPositions = GameManager.currentGameState.getPlayerPositionsMap();
     double distance = 0;
     String name = "";
     for (String s : playerPositions.keySet()) {
