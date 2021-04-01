@@ -11,6 +11,7 @@ public class Ghost extends Adversary {
   HashMap<String, Position> adversaryPositions;
   Position currentPosition;
   ArrayList<HashMap<Position, Integer>> roomLayouts;
+  GameState gameState;
 
   public Ghost(int id) {
     super(id);
@@ -43,10 +44,14 @@ public class Ghost extends Adversary {
     this.playerPositions = gs.getPlayerPositionsMap();
     this.adversaryPositions = gs.getAdversaryPositionsMap();
     this.l = gs.getL();
+    this.gameState = gs;
+  }
+
+  public void updatePlayerPositions(HashMap<String, Position> playerPosMap) {
+    this.playerPositions = playerPosMap;
   }
 
   public void updatePosition() {
-    this.playerPositions = GameManager.currentGameState.getPlayerPositionsMap();
     double distance = 0;
     String name = "";
     for (String s : playerPositions.keySet()) {

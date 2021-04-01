@@ -78,6 +78,7 @@ public class GameManager {
         generateInitialPositions(currentLevelIndex);
         this.currentLevelIndex = currentLevelIndex;
         RuleChecker ruleChecker = new RuleChecker(levels.get(currentLevelIndex));
+
     }
 
     /**
@@ -170,7 +171,11 @@ public class GameManager {
         for(int j = 0; j < 100; j++) {
             for (int i=0; i<playerUsernames.size();i++) {
                 String username = playerUsernames.get(i);
+                if (expelledPlayers.size() > 0) {
+                    System.out.println(expelledPlayers.get(0));
+                }
                 if (!expelledPlayers.contains(username)) {
+                    currentGameState.getPlayerPositionsMap().get(String.valueOf(0)).print();
                     Position current = currentGameState.getPlayerPositionsMap().get(String.valueOf(0));
                     current.print();
                     System.out.print(username+", this is your current game state.\n");
@@ -188,13 +193,13 @@ public class GameManager {
                         Integer result = ruleChecker.determinePlayerInteractionTest(String.valueOf(0),
                             new Position(x, y), adversaryPositions, currentGameState.getPlayerPositionsMap(),
                             currentGameState.exitStatus );
-                        System.out.print(result);
+//                        System.out.print(result);
                         if (result ==3) {
                             expelledPlayers.add(username);
-                            System.out.print("Player "+username + " was expelled.");
+                            System.out.println("Player "+username + " was expelled.");
                         }
                         if (result ==0) {
-                            System.out.print("Player "+username + " found the key.");
+                            System.out.println("Player "+username + " found the key.");
                             if (playerKeyCount.containsKey(username)) {
                                 Integer temp = playerKeyCount.get(username);
                                 playerKeyCount.remove(username);
@@ -202,9 +207,10 @@ public class GameManager {
                             } else {
                                 playerKeyCount.put(username, 1);
                             }
+                            currentGameState.setExitStatus(true);
                         }
                         if (result ==2) {
-                            System.out.print("Player "+username + " exited.");
+                            System.out.println("Player "+username + " exited.");
                             if (playerExitCount.containsKey(username)) {
                                 Integer temp = playerExitCount.get(username);
                                 playerExitCount.remove(username);
@@ -217,16 +223,17 @@ public class GameManager {
                                 expelledPlayers = new ArrayList<>();
                                 startLocalGame();
                             } else {
-                                System.out.print("You have won the game!");
+                                System.out.println("You have won the game!");
                                 endGame();
                             }
                         }
-                        currentGameState.updatePlayerState(String.valueOf(0), result,new Position(x, y));
+                        current = new Position(x, y);
+                        currentGameState.updatePlayerState(String.valueOf(0), result, current);
                     }
 //                    printUpdate(new Position(x,y));
                   if (expelledPlayers.size() == playerNumber) {
-                      System.out.print("All players are ejected. The game is over. "
-                          + "You failed in Level" + currentLevelIndex);
+                      System.out.println("All players are ejected. The game is over. "
+                          + "You failed in Level " + currentLevelIndex);
                       endGame();
                       break;
 
@@ -235,21 +242,44 @@ public class GameManager {
             }
             for(int i = 0; i < zombieNumber; i++) {
                 Zombie temp = zombies.get(i);
+                temp.updatePlayerPositions(currentGameState.getPlayerPositionsMap());
                 temp.updatePosition();
+                Position newP = temp.getP();
+                if (currentGameState.getPlayerPositionsMap().containsValue(newP)) {
+                    expelledPlayers.add(playerUsernames.get(0));
+                }
                 currentGameState.updateAdversaryMap(String.valueOf(i + 1), temp.getP());
             }
 
             for(int i = 0; i < ghostNumber; i++) {
                 Ghost temp = ghosts.get(i);
+                temp.updatePlayerPositions(currentGameState.getPlayerPositionsMap());
                 temp.updatePosition();
+                Position newP = temp.getP();
+                if (currentGameState.getPlayerPositionsMap().containsValue(newP)) {
+                    expelledPlayers.add(playerUsernames.get(0));
+                }
                 currentGameState.updateAdversaryMap(String.valueOf(i + 1), temp.getP());
             }
         }
     }
 
     public static void endGame() {
-        System.out.print(playerUsernames.get(0) +" exited"+ playerExitCount.get(playerUsernames.get(0))+ " times.");
-        System.out.print(playerUsernames.get(0) +" found the key"+ playerKeyCount.get(playerUsernames.get(0))+ " times.");
+        int exitCount = -1;
+        int keyCount = -1;
+        if (playerExitCount.get(playerUsernames.get(0)) == null) {
+            exitCount = 0;
+        } else {
+            exitCount = playerExitCount.get(playerUsernames.get(0));
+        }
+        if (playerKeyCount.get(playerUsernames.get(0)) == null) {
+            keyCount = 0;
+        } else {
+            keyCount = playerKeyCount.get(playerUsernames.get(0));
+        }
+
+        System.out.println(playerUsernames.get(0) +" exited "+ exitCount + " times.");
+        System.out.println(playerUsernames.get(0) +" found the key "+ keyCount + " times.");
     }
 
     public static void printUpdate(Position current) {

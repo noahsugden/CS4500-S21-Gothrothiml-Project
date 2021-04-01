@@ -6,6 +6,7 @@ public class Zombie extends Adversary {
   HashMap<String, Position> playerPositions;
   HashMap<String, Position> adversaryPositions;
   Position currentPosition;
+  GameState gameState;
 
   public Zombie(int id) {
     super(id);
@@ -26,6 +27,8 @@ public class Zombie extends Adversary {
     this.playerPositions = gs.getPlayerPositionsMap();
     this.adversaryPositions = gs.getAdversaryPositionsMap();
     this.levelLayout = gs.getL().getLevelLayout();
+    this.gameState =  gs;
+
   }
 
   public void setPosition(Position p) {
@@ -38,8 +41,11 @@ public class Zombie extends Adversary {
     return this.currentPosition;
   }
 
+  public void updatePlayerPositions(HashMap<String, Position> playerPosMap) {
+    this.playerPositions = playerPosMap;
+  }
+
   public void updatePosition() {
-    this.playerPositions = GameManager.currentGameState.getPlayerPositionsMap();
     double distance = 0;
     String name = "";
     for (String s : playerPositions.keySet()) {
@@ -53,6 +59,7 @@ public class Zombie extends Adversary {
         name = s;
       }
     }
+    System.out.println(name);
     Position move = findTile(name);
     currentPosition = move;
   }
