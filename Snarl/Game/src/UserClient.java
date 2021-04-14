@@ -1,7 +1,7 @@
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,21 +26,64 @@ public class UserClient implements User{
 
   public UserClient(String address, int port) {
     Socket client;
-    BufferedReader inServer;
     BufferedReader inUser;
     DataOutputStream out;
     try {
       client = new Socket(address, port);
-      inServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
+
+      DataInputStream in = new DataInputStream(new BufferedInputStream(client.getInputStream()));
       inUser = new BufferedReader(new InputStreamReader(System.in));
       out = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
+
+      client.setKeepAlive(true);
       System.out.println("Connected to server...");
-      String line = inServer.readLine();
-      System.out.println(line);
+
+      try {
+        //reads the welcome json from the server
+        String welcomeJson = readJsonObject(in);
+        System.out.print(welcomeJson+"\n");
+        //reads the username request from the server
+        String next = readJsonObject(in);
+        while (next.equals("name")) {
+          System.out.print("Please enter your username:" + "\n");
+          String username = inUser.readLine();
+          out.writeChars(username);
+          out.flush();
+          next = readJsonObject(in);
+        }
+
+
+
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
     } catch (Exception e) {
 
     }
 
+  }
+
+  public String readJsonObject(DataInputStream in) throws Exception {
+    Character curr = in.readChar();
+    StringBuilder valid = new StringBuilder();
+    while(curr != '\0') {
+      valid.append(curr);
+     // System.out.print(valid.toString()+"\n");
+      if (valid.toString().equals("name")) {
+        return "name";
+      }
+      try {
+        JSONObject object = new JSONObject(valid.toString());
+        String type = object.getString("type");
+        return valid.toString();
+      } catch (JSONException e){
+        curr = in.readChar();
+      }
+
+
+    }
+    throw new Exception("Not a valid string");
   }
 
   @Override
