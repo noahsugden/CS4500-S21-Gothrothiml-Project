@@ -45,7 +45,7 @@ public class GameManager {
     static String fileName = "snarl.levels";
     static Integer playerNumber =1;
     static Integer startLevel =1;
-    static boolean observe = false;
+    static boolean observe = true;
     static ArrayList<Level> levels = new ArrayList<>();
     static Integer natural;
     static GameManager gameManager;
@@ -77,7 +77,7 @@ public class GameManager {
         levelLayout = l.getLevelLayout();
         generateInitialPositions(currentLevelIndex);
         this.currentLevelIndex = currentLevelIndex;
-        RuleChecker ruleChecker = new RuleChecker(levels.get(currentLevelIndex));
+        ruleChecker = new RuleChecker(levels.get(currentLevelIndex));
 
     }
 
@@ -153,9 +153,8 @@ public class GameManager {
             String username = sc.nextLine();
             playerUsernames.add(username);
         }
-        GameState initialGameState = new GameState(playerIDpositions, adversaryIDpositions,
+        currentGameState = new GameState(playerIDpositions, adversaryIDpositions,
                 levels.get(currentLevelIndex), zombieNumber );
-        currentGameState = initialGameState;
         for (int i = 0; i < zombies.size(); i++) {
             zombies.get(i).setMaps(currentGameState);
         }
@@ -181,16 +180,16 @@ public class GameManager {
                     System.out.print(username+", this is your current game state.\n");
                     printUpdate(current);
                     System.out.print("Please enter the x position of your next move:");
-                    String moveX = sc.nextLine();
-                    Integer x = Integer.parseInt(moveX);
-                    System.out.print("Please enter the y position of your next move:");
                     String moveY = sc.nextLine();
-                    Integer y = Integer.parseInt(moveY);
-                    if (ruleChecker.isValidPlayerMoveTest("", current, new Position(x,y),
+                    Integer x = Integer.parseInt(moveY);
+                    System.out.print("Please enter the y position of your next move:");
+                    String moveX = sc.nextLine();
+                    Integer y = Integer.parseInt(moveX);
+                    if (RuleChecker.isValidPlayerMoveTest("", current, new Position(x,y),
                             currentGameState.getPlayerPositionsMap())) {
                         ArrayList<Position> adversaryPositions =
                                 currentGameState.fromMapToArrayList(currentGameState.getAdversaryPositionsMap());
-                        Integer result = ruleChecker.determinePlayerInteractionTest(String.valueOf(0),
+                        Integer result = RuleChecker.determinePlayerInteractionTest(String.valueOf(0),
                             new Position(x, y), adversaryPositions, currentGameState.getPlayerPositionsMap(),
                             currentGameState.exitStatus );
 //                        System.out.print(result);
@@ -229,6 +228,9 @@ public class GameManager {
                         }
                         current = new Position(x, y);
                         currentGameState.updatePlayerState(String.valueOf(0), result, current);
+                    }
+                    else {
+                        System.out.print("Not valid position. Please enter again.");
                     }
 //                    printUpdate(new Position(x,y));
                   if (expelledPlayers.size() == playerNumber) {
@@ -297,7 +299,7 @@ public class GameManager {
     public static void printInformation(HashMap<String,Position> actorMap) {
         for(String s:actorMap.keySet()) {
             Integer index = Integer.parseInt(s);
-            Position current = actorMap.get(index);
+            Position current = actorMap.get(s);
             if(index>=playerNumber && index<playerNumber+zombieNumber) {
                 System.out.print("The adversary at ("+ current.getx()+","+current.gety() +") is a zombie.");
             } else if (index >=playerNumber+zombieNumber) {
@@ -532,26 +534,23 @@ public class GameManager {
         for (String s : surroundingPositions.keySet()) {
             if (s.equals("key")) {
                 Position key = surroundingPositions.get(s);
-                int keyX = key.getx();
-                int keyY = key.gety();
+                int keyX = key.gety();
+                int keyY = key.getx();
                 visibleTiles[keyX][keyY] = 7;
-            }
-            if (s.equals("exit")) {
+            }else if (s.equals("exit")) {
                 Position exit = surroundingPositions.get(s);
-                int exitX = exit.getx();
-                int exitY = exit.gety();
+                int exitX = exit.gety();
+                int exitY = exit.getx();
                 visibleTiles[exitX][exitY] = 8;
-            }
-            if (Integer.parseInt(s) <playerNumber) {
+            }else if (Integer.parseInt(s) <playerNumber) {
                 Position player = surroundingPositions.get(s);
-                int playerX = player.getx();
-                int playerY = player.gety();
+                int playerX = player.gety();
+                int playerY = player.getx();
                 visibleTiles[playerX][playerY] = 3;
-            }
-            if (Integer.parseInt(s)>=playerNumber) {
+            } else if (Integer.parseInt(s)>=playerNumber) {
                 Position adversary = surroundingPositions.get(s);
-                int adversaryX = adversary.getx();
-                int adversaryY = adversary.gety();
+                int adversaryX = adversary.gety();
+                int adversaryY = adversary.getx();
                 visibleTiles[adversaryX][adversaryY] = 9;
             }
         }

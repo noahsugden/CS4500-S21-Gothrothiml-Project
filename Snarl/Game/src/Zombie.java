@@ -59,7 +59,6 @@ public class Zombie extends Adversary {
         name = s;
       }
     }
-    System.out.println(name);
     Position move = findTile(name);
     currentPosition = move;
   }
