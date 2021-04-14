@@ -1,3 +1,8 @@
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -18,10 +23,31 @@ public class UserClient implements User{
     this.abilities = abilities;
   }
 
+
+  public UserClient(String address, int port) {
+    Socket client;
+    BufferedReader inServer;
+    BufferedReader inUser;
+    DataOutputStream out;
+    try {
+      client = new Socket(address, port);
+      inServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
+      inUser = new BufferedReader(new InputStreamReader(System.in));
+      out = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
+      System.out.println("Connected to server...");
+      String line = inServer.readLine();
+      System.out.println(line);
+    } catch (Exception e) {
+
+    }
+
+  }
+
   @Override
   public void sendName(String uniqueName) {
 
   }
+
 
   @Override
   public void receiveVisibleTiles() {
@@ -46,6 +72,7 @@ public class UserClient implements User{
 
   @Override
   public void createConnection() {
+
 
   }
 
@@ -109,4 +136,23 @@ public class UserClient implements User{
       System.out.println(lastString);
     }
   }
+
+  public static void main(String[] args) {
+    int port = 45678;
+    String address = "127.0.0.1";
+    for(int i = 0; i < args.length; i++) {
+    String argument  = args[i];
+    switch(argument) {
+      case "--address":
+        address = args[i + 1];
+        break;
+      case "--port":
+        port = Integer.parseInt(args[i + 1]);
+        break;
+    }
+  }
+    UserClient client = new UserClient(address, port);
+
+  }
 }
+
