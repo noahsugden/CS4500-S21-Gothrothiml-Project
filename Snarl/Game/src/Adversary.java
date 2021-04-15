@@ -22,7 +22,7 @@ public class Adversary {
      *           We make this.id 100-id because Adversary IDs start at 100.
      */
     public Adversary(int id) {
-        this.id = 100-id;
+        this.id = id;
     }
 
 
@@ -64,6 +64,12 @@ public class Adversary {
     public Position getP() {
         return this.p;
     }
+
+    public void updatePlayerPositions(GameState gs) {
+
+    }
+
+    public void updatePosition(){}
 
 
     /**

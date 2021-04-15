@@ -42,15 +42,26 @@ public class Ghost extends Adversary {
 
   public void setMaps(GameState gs) {
     this.playerPositions = gs.getPlayerPositionsMap();
+    ArrayList<String> inactivePlayers = gs.inactivePlayers;
     this.adversaryPositions = gs.getAdversaryPositionsMap();
+    for (String s:inactivePlayers) {
+      playerPositions.remove(s);
+    }
     this.l = gs.getL();
     this.gameState = gs;
   }
 
-  public void updatePlayerPositions(HashMap<String, Position> playerPosMap) {
-    this.playerPositions = playerPosMap;
+  @Override
+  public void updatePlayerPositions(GameState gs) {
+    this.playerPositions = gs.getPlayerPositionsMap();
+    ArrayList<String> inactivePlayers = gs.inactivePlayers;
+    this.adversaryPositions = gs.getAdversaryPositionsMap();
+    for (String s:inactivePlayers) {
+      playerPositions.remove(s);
+    }
   }
 
+  @Override
   public void updatePosition() {
     double distance = 0;
     String name = "";

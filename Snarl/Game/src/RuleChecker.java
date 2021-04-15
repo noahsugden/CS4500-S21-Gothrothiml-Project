@@ -109,13 +109,6 @@ public class RuleChecker {
 
     /**
      * Determines if the level has ended and the current circumstances of the game.
-     * @param playerArrived represents if a player has arrived at the exit
-     * @param isFinalLevel represents if this level is the final level
-     * @param players represents an ArrayList of the active Players
-     * @return an int representing the result; 0 if any player has arrived the level exit while the
-     *         exit has been unlocked, 1 if the the level is not end, 2 if the level has ended and
-     *         the current level is the final level, 3 if all players are expelled
-     */
     int isLevelEnd(boolean playerArrived, boolean isFinalLevel, ArrayList<Player> players) {
         boolean exitStatus = l.getExitStatus();
         if (playerArrived && exitStatus) {
@@ -128,6 +121,16 @@ public class RuleChecker {
             return 3;
         }
         return -1;
+    }
+     */
+
+    public boolean isLevelEnd(ArrayList<String> expelledPlayers,ArrayList<String> exitedPlayers, ArrayList<String> usernames) {
+        for (String username: usernames) {
+            if (!expelledPlayers.contains(username) && !exitedPlayers.contains(username)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

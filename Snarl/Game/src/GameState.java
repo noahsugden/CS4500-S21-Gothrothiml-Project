@@ -34,6 +34,7 @@ public class GameState {
     HashMap<String, Position> objectPositionsMap = new HashMap<>();
     int[][] out;
 
+    ArrayList<String> inactivePlayers;
 
     boolean exitStatus;
     boolean playerArrived;
@@ -136,6 +137,7 @@ public class GameState {
         this.adversaryPositionsMap = transformHashMap(adversaryIDpositions);
         this.l = level;
         initializeObjectsMap();
+        inactivePlayers = new ArrayList<>();
     }
 
     public HashMap<String, Position> getAdversaryPositionsMap() {
@@ -382,9 +384,12 @@ public class GameState {
     }
 
     public void updatePlayerState(String name, int result, Position move){
+        if (move.equals(new Position(-1,-1))) {
+            return;
+        }
         //when player meets an adversary
         if (result ==3 || result ==2) {
-            this.playerPositionsMap.remove(name);
+            inactivePlayers.add(name);
         } //when the player picks a key
         else if (result ==0) {
             this.exitStatus = true;
@@ -423,8 +428,10 @@ public class GameState {
     public void updateAdversaryMap(String s, Position p) {
         adversaryPositionsMap.remove(s);
         adversaryPositionsMap.put(s, p);
-        if (playerPositionsMap.containsValue(p)) {
-            playerPositionsMap.remove(String.valueOf(0));
+        for (String id: this.playerPositionsMap.keySet()) {
+            if (playerPositionsMap.get(id).equals(p)) {
+                inactivePlayers.add(id);
+            }
         }
     }
 
