@@ -4,6 +4,7 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +47,10 @@ public class UserClient implements User{
       try {
         //reads the welcome json from the server
         String welcomeJson = readJsonObject(in);
-        System.out.print(welcomeJson+"\n");
+        JSONObject welcome = new JSONObject(welcomeJson);
+        String info = welcome.getString("info");
+        System.out.print("Welcome!"+"\n");
+        System.out.print(info +"\n");
         //reads the username request from the server
         String next = readJsonObject(in);
         while (next.equals("name")) {
@@ -59,19 +63,29 @@ public class UserClient implements User{
         }
         respond(next);
 
-        while (true) {
+        while (client.getKeepAlive()) {
           next = readJsonObject(in);
           respond(next);
         }
+        client.close();
+
 
 
 
       } catch (Exception e) {
-        e.printStackTrace();
+        if (e instanceof SocketException) {
+          System.out.print("The server has disconnected");
+        } else {
+          e.printStackTrace();
+        }
       }
 
     } catch (Exception e) {
-
+      if (e instanceof SocketException) {
+        System.out.print("The server has disconnected");
+      } else {
+        e.printStackTrace();
+      }
     }
 
   }
@@ -79,7 +93,10 @@ public class UserClient implements User{
   public void respond(String json) throws Exception {
     switch(json){
       case "move":
+        sendMove();
+        return;
       case "Invalid":
+        System.out.print("The move is invalid. Please enter again." +"\n");
         sendMove();
         return;
       case "Key":
@@ -92,7 +109,7 @@ public class UserClient implements User{
         System.out.print("You have been ejected. Please wait for the level to end." +"\n");
         return;
       case "OK":
-        System.out.print("You have made a successful move.");
+        System.out.print("You have made a successful move." +"\n");
         return;
 
     }
@@ -106,14 +123,39 @@ public class UserClient implements User{
         break;
       case "end-level":
         printEndLevel(json);
+        break;
+      case "end-game":
+        printEndGame(json);
+        client.setKeepAlive(false);
+
+        break;
+    }
+  }
+
+  public void printEndGame(String json) throws JSONException {
+    JSONObject endGame = new JSONObject(json);
+    System.out.print("The game is over."+"\n");
+    JSONArray scoreList = endGame.getJSONArray("scores");
+    for (int i=0;i< scoreList.length();i++) {
+      JSONObject playerScore = scoreList.getJSONObject(i);
+      String name = playerScore.getString("name");
+      int exits = playerScore.getInt("exits");
+      int keys = playerScore.getInt("keys");
+      int ejects = playerScore.getInt("ejects");
+      System.out.print(name + " exited "+ exits +" times." +"\n");
+      System.out.print(name +" picked up " + keys +" keys."+"\n");
+      System.out.print(name + " was ejected "+ejects+" times." +"\n");
     }
   }
 
   public void printEndLevel(String json) throws JSONException {
     JSONObject endLevel = new JSONObject(json);
     System.out.print("The level has ended."+"\n");
-    String keyPlayer = endLevel.getString("key");
-    System.out.print(keyPlayer+" picked up the key." + "\n");
+    Object keyPlayer = endLevel.get("key");
+    if (keyPlayer instanceof String) {
+      keyPlayer = endLevel.getString("key");
+      System.out.print(keyPlayer + " picked up the key." + "\n");
+    }
     JSONArray exits = endLevel.getJSONArray("exits");
     JSONArray ejects = endLevel.getJSONArray("ejects");
 
@@ -127,36 +169,38 @@ public class UserClient implements User{
 
   public Position getValidMove() throws Exception {
     Position prev = current;
-    System.out.print("Please type in the direction you want to go:"+"\n");
-    System.out.print("left/right/up/down/stay"+"\n");
+    printDirections();
     //first time requesting
     String direction = inUser.readLine();
-    boolean invalidDirection = !direction.equals("left")&&!direction.equals("right")&&
-            !direction.equals("down")&&!direction.equals("up")&&!direction.equals("stay");
+    boolean invalidDirection = isValidDirection(direction);
     //keeps asking if the move is invalid
     while (invalidDirection) {
-      System.out.print("Please type in the direction you want to go:"+"\n");
-      System.out.print("left/right/up/down/stay"+"\n");
+      printDirections();
       direction = inUser.readLine();
-      invalidDirection = !direction.equals("left")&&!direction.equals("right")&&
-              !direction.equals("down")&&!direction.equals("up")&&!direction.equals("stay");
+      invalidDirection = isValidDirection(direction);
     }
     prev = generateNextMove(direction, prev);
-    System.out.print("Please type in the direction you want to go:"+"\n");
-    System.out.print("left/right/up/down/stay"+"\n");
+    printDirections();
     //second time requesting
     direction = inUser.readLine();
-    invalidDirection = !direction.equals("left")&&!direction.equals("right")&&
-            !direction.equals("down")&&!direction.equals("up")&&!direction.equals("stay");
+    invalidDirection = isValidDirection(direction);
     while (invalidDirection) {
-      System.out.print("Please type in the direction you want to go:"+"\n");
-      System.out.print("left/right/up/down/stay"+"\n");
+     printDirections();
       direction = inUser.readLine();
-      invalidDirection = !direction.equals("left")&&!direction.equals("right")&&
-              !direction.equals("down")&&!direction.equals("up")&&!direction.equals("stay");
+      invalidDirection =isValidDirection(direction);
     }
     return generateNextMove(direction, prev);
 
+  }
+
+  public boolean isValidDirection(String direction) {
+    return !direction.equals("left")&&!direction.equals("right")&&
+            !direction.equals("down")&&!direction.equals("up")&&!direction.equals("stay");
+  }
+
+  public void printDirections() {
+    System.out.print("Please type in the direction you want to go:"+"\n");
+    System.out.print("left/right/up/down/stay"+"\n");
   }
 
   public void sendMove() throws Exception {
@@ -236,7 +280,7 @@ public class UserClient implements User{
       Integer actorX = actorPos.getInt(0);
       Integer actorY = actorPos.getInt(1);
       if (actor.getString("type").equals("player")) {
-        Integer playerID = otherPlayers.indexOf(name) +10;
+        Integer playerID = otherPlayers.indexOf(name) +100;
         ascii[actorX-x+2][actorY-y+2] = playerID;
       } else if (actor.getString("type").equals("zombie")) {
         ascii[actorX-x+2][actorY-y+2] = 11;
@@ -303,7 +347,8 @@ public class UserClient implements User{
             System.out.print(" . ");
             break;
           case 3:
-            System.out.print(" p ");
+            char[] nameArray = name.toCharArray();
+            System.out.print(" "+nameArray[0]+" ");
             break;
           case 4:
             System.out.print(" < ");
@@ -312,7 +357,7 @@ public class UserClient implements User{
             System.out.print(" k ");
             break;
           case 8:
-            System.out.print(" e ");
+            System.out.print(" $ ");
             break;
           case 11:
             System.out.print(" z ");
@@ -320,6 +365,19 @@ public class UserClient implements User{
           case 12:
             System.out.print(" g ");
             break;
+          case 100:
+            nameArray = otherPlayers.get(0).toCharArray();
+            System.out.print(" "+nameArray[0]+" ");
+            break;
+            case 101:
+            nameArray = otherPlayers.get(1).toCharArray();
+            System.out.print(" "+nameArray[0]+" ");
+            break;
+            case 102:
+            nameArray = otherPlayers.get(2).toCharArray();
+            System.out.print(" "+nameArray[0]+" ");
+            break;
+
         }
       }
       System.out.println();
@@ -340,7 +398,7 @@ public class UserClient implements User{
       if (!player.equals(name)) {
         otherPlayers.add(player);
       }
-      System.out.print(player);
+      System.out.print(player+" ");
     }
     System.out.print("\n");
   }

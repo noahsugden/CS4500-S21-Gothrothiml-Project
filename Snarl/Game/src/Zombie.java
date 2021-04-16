@@ -117,7 +117,11 @@ public class Zombie extends Adversary {
   }
 
   public boolean isTraversable(Position p) {
-    return levelLayout.get(p) == 2 || levelLayout.get(p) == 7 || levelLayout.get(p) == 8 && !adversaryPositions.containsValue(p);
-  }
+    if (levelLayout.containsKey(p)) {
+      return levelLayout.get(p) == 2 || levelLayout.get(p) == 7 || levelLayout.get(p) == 8 && !adversaryPositions.containsValue(p);
+    } else {
+      return false;
+    }
 
+  }
 }

@@ -3,11 +3,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Scanner;
 
 // Unit tests for our GameManager are pointless at this point, since it is very likely that it will
 // change. Once we incorporate networking, we will implement the unit tests.
@@ -34,6 +31,7 @@ public class GameManager {
     static HashMap<Integer, Position> adversaryIDpositions;
     HashMap<String, Integer> playerExitCount;
     HashMap<String, Integer> playerKeyCount;
+    HashMap<String, Integer> playerEjectCount;
     boolean levelEnd;
     static int turnNumber;
     static HashMap<Position, Integer> levelLayout;
@@ -105,6 +103,7 @@ public class GameManager {
         updateAdversaries();
         playerKeyCount = new HashMap<>();
         playerExitCount = new HashMap<>();
+        playerEjectCount = new HashMap<>();
     }
 
     /**
@@ -120,7 +119,27 @@ public class GameManager {
 
     }
 
+    public void startNewLevel() {
+        currentLevelIndex+=1;
+        System.out.print("currentLevelIndex is "+currentLevelIndex+"\n");
+        l = levels.get(currentLevelIndex);
+        levelLayout = l.getLevelLayout();
+        createAdversaries(currentLevelIndex);
+        playerIDpositions = new HashMap<>();
+        adversaryIDpositions = new HashMap<>();
+        generateInitialPositions(currentLevelIndex);
+        ruleChecker = new RuleChecker(l);
+        currentGameState = new GameState(playerIDpositions, adversaryIDpositions,
+                levels.get(currentLevelIndex), zombieNumber );
+        updateAdversaries();
+        levelEnd = false;
+        expelledPlayers = new ArrayList<>();
+        exitedPlayers = new ArrayList<>();
+    }
+
     public void createAdversaries(Integer currentLevelIndex) {
+        zombies = new ArrayList<>();
+        ghosts = new ArrayList<>();
         zombieNumber = currentLevelIndex/2 +1;
         ghostNumber = (currentLevelIndex-1)/2;
         for (int i=0;i<zombieNumber;i++) {
@@ -149,9 +168,7 @@ public class GameManager {
         startLevel.put("type", "start-level");
         startLevel.put("level", currentLevelIndex);
         for (String playerUsername : playerUsernames) {
-            if (!expelledPlayers.contains(playerUsername)) {
                 namesArray.put(playerUsername);
-            }
         }
         startLevel.put("players",namesArray);
         return startLevel;
@@ -233,10 +250,11 @@ public class GameManager {
         for (int i = 0; i < ghosts.size(); i++) {
             ghosts.get(i).setMaps(currentGameState);
         }
-        runGame();
+        //runGame();
 
     }
 
+    /**
     public void runGame() {
         Scanner sc = new Scanner(System.in);
         for(int j = 0; j < 100; j++) {
@@ -338,18 +356,41 @@ public class GameManager {
         }
     }
 
+     **/
+    public boolean isClientInActive(int id) {
+        return expelledPlayers.contains(playerUsernames.get(id)) || exitedPlayers.contains(playerUsernames.get(id));
+    }
+
     public void adversaryMove(Adversary temp){
         temp.updatePlayerPositions(this.currentGameState);
         temp.updatePosition();
         Position newP = temp.getP();
-        if (this.currentGameState.getPlayerPositionsMap().containsValue(newP)) {
-            this.expelledPlayers.add(playerUsernames.get(0));
+        HashMap<String, Position> playerPositionsMap = this.currentGameState.getPlayerPositionsMap();
+
+        for (String s:playerPositionsMap.keySet()) {
+            if (playerPositionsMap.get(s).equals(newP)) {
+                this.expelledPlayers.add(playerUsernames.get((Integer.parseInt(s))));
+                addCount(playerEjectCount, s);
+            }
+
         }
         this.currentGameState.updateAdversaryMap(String.valueOf(temp.getId()), temp.getP());
         levelEnd = ruleChecker.isLevelEnd(expelledPlayers, exitedPlayers, playerUsernames);
 
     }
 
+    public void addCount(HashMap<String, Integer> countMap, String name) {
+        if(countMap.containsKey(name)) {
+            int ejectCount = countMap.get(name) +1;
+            countMap.put(name, ejectCount);
+        } else {
+            countMap.put(name, 1);
+        }
+    }
+
+    public boolean isLastLevel() {
+        return levels.size()-1 == currentLevelIndex;
+    }
 
     public String performOneMove(int id, Position move) throws Exception {
         if (!this.determineValidMove(String.valueOf(id), move)) {
@@ -372,6 +413,12 @@ public class GameManager {
 
         throw new Exception("invalid interaction");
 
+    }
+
+    public void observe() {
+        System.out.print("===========" +"\n");
+            printAscii(generateObserver());
+        System.out.print("===========" +"\n");
     }
 
     public void endGame() {
@@ -570,7 +617,16 @@ public class GameManager {
     public boolean determineValidMove(String name, Position move) {
         HashMap<String, Position> playerPosMap = currentGameState.getPlayerPositionsMap();
         Position current = playerPosMap.get(name);
-        return RuleChecker.isValidPlayerMoveTest(name, current, move, playerPosMap);
+        ArrayList<String> inActivePlayers = new ArrayList<>();
+        for (int i=0;i<exitedPlayers.size();i++) {
+            int index = playerUsernames.indexOf(exitedPlayers.get(i));
+            inActivePlayers.add(String.valueOf(index));
+        }
+        for (int i=0;i<expelledPlayers.size();i++) {
+            int index = playerUsernames.indexOf(expelledPlayers.get(i));
+            inActivePlayers.add(String.valueOf(index));
+        }
+        return RuleChecker.isValidPlayerMoveTest(name, current, move, playerPosMap, inActivePlayers);
 
     }
 
@@ -584,24 +640,13 @@ public class GameManager {
                 exitStatus);
         if (result ==3) {
             expelledPlayers.add(playerUsernames.get(Integer.parseInt(name)));
+            addCount(playerEjectCount,name);
         } else if (result ==2) {
             exitedPlayers.add(playerUsernames.get(Integer.parseInt(name)));
-            if (!playerExitCount.containsKey(name)) {
-                playerExitCount.put(name, 1);
-            } else {
-                int exitCount = playerExitCount.get(name);
-                playerExitCount.remove(name);
-                playerExitCount.put(name, exitCount+1);
-            }
+           addCount(playerExitCount, name);
         } else if (result == 0) {
             keyPlayer = name;
-            if (!playerKeyCount.containsKey(name)) {
-                playerKeyCount.put(name, 1);
-            } else {
-                int keyCount = playerKeyCount.get(name);
-                playerKeyCount.remove(name);
-                playerKeyCount.put(name, keyCount+1);
-            }
+            addCount(playerKeyCount, name);
 
         }
         levelEnd = ruleChecker.isLevelEnd(expelledPlayers,exitedPlayers,  playerUsernames);
@@ -654,6 +699,97 @@ public class GameManager {
 
     }
 
+    public int[][] generateObserver() {
+        int[][] layout = currentGameState.getL().get2Darray();
+        int[][] visibleTiles = copyofArray(layout);
+
+        HashMap<String, Position> playerPositionsMap = this.currentGameState.getPlayerPositionsMap();
+        HashMap<String, Position> adversaryPositionsMap = this.currentGameState.getAdversaryPositionsMap();
+        for (String s: playerPositionsMap.keySet()) {
+            String name = playerUsernames.get(Integer.parseInt(s));
+            if (!exitedPlayers.contains(name)&&!expelledPlayers.contains(name)) {
+                Position current = playerPositionsMap.get(s);
+                int x = current.getx();
+                int y = current.gety();
+                visibleTiles[y][x] = 100+Integer.parseInt(s);
+            }
+        }
+        for (String s:adversaryPositionsMap.keySet()) {
+            int index = Integer.parseInt(s);
+            Position current = adversaryPositionsMap.get(s);
+            int x = current.getx();
+            int y = current.gety();
+            if (index>=playerNumber&&index<playerNumber+zombieNumber) {
+                visibleTiles[y][x]=11;
+            } else {
+                visibleTiles[y][x]=12;
+            }
+        }
+
+        return visibleTiles;
+    }
+
+    public void printAscii(int[][] ascii) {
+        for (int[] x : ascii)
+        {
+            for (int y : x)
+            {
+                switch(y) {
+                    case 0:
+                        System.out.print("   ");
+                        break;
+                    case 1:
+                        System.out.print(" * ");
+                        break;
+                    case 2:
+                        System.out.print(" . ");
+                        break;
+                    case 3:
+
+                        break;
+                    case 4:
+                        System.out.print(" < ");
+                        break;
+                    case 5:
+                        System.out.print(" - ");
+                        break;
+                    case 6:
+                        System.out.print(" | ");
+                        break;
+                    case 7:
+                        System.out.print(" k ");
+                        break;
+                    case 8:
+                        System.out.print(" $ ");
+                        break;
+                    case 11:
+                        System.out.print(" z ");
+                        break;
+                    case 12:
+                        System.out.print(" g ");
+                        break;
+                    case 100:
+                        char[] nameArray = playerUsernames.get(0).toCharArray();
+                        System.out.print(" "+nameArray[0]+" ");
+                        break;
+                    case 101:
+                        nameArray = playerUsernames.get(1).toCharArray();
+                        System.out.print(" "+nameArray[0]+" ");
+                        break;
+                    case 102:
+                        nameArray = playerUsernames.get(2).toCharArray();
+                        System.out.print(" "+nameArray[0]+" ");
+                        break;
+                    case 103:
+                        nameArray = playerUsernames.get(3).toCharArray();
+                        System.out.print(" "+nameArray[0]+" ");
+                        break;
+                }
+            }
+            System.out.println();
+        }
+    }
+
     public int[][] generateObserverUpdate() {
         HashMap<String, Position> actorPositionsMap = new HashMap<>();
         actorPositionsMap.putAll(currentGameState.getPlayerPositionsMap());
@@ -674,12 +810,12 @@ public class GameManager {
                 int exitX = exit.gety();
                 int exitY = exit.getx();
                 visibleTiles[exitX][exitY] = 8;
-            }else if (Integer.parseInt(s) <playerNumber) {
+            }else if (Integer.parseInt(s) <playerUsernames.size()) {
                 Position player = surroundingPositions.get(s);
                 int playerX = player.gety();
                 int playerY = player.getx();
                 visibleTiles[playerX][playerY] = 3;
-            } else if (Integer.parseInt(s)>=playerNumber) {
+            } else if (Integer.parseInt(s)>=playerUsernames.size()) {
                 Position adversary = surroundingPositions.get(s);
                 int adversaryX = adversary.gety();
                 int adversaryY = adversary.getx();
@@ -756,13 +892,45 @@ public class GameManager {
         }
     }
 
+    public JSONObject generateEndGame() throws JSONException {
+        JSONObject endGame = new JSONObject();
+        endGame.put("type", "end-game");
+
+        JSONArray playerScoreList = new JSONArray();
+
+        for(int i=0;i<playerUsernames.size();i++) {
+            JSONObject playerScore = new JSONObject();
+            playerScore.put("type", "player-score");
+            playerScore.put("name", playerUsernames.get(i));
+            String name =String.valueOf(i);
+            if (playerExitCount.containsKey(name)) {
+                playerScore.put("exits", playerExitCount.get(name));
+            } else {
+                playerScore.put("exits", 0);
+            }
+            if (playerEjectCount.containsKey(name)) {
+                playerScore.put("ejects", playerEjectCount.get(name));
+            } else {
+                playerScore.put("ejects", 0);
+            }
+            if (playerKeyCount.containsKey(name)) {
+                playerScore.put("keys", playerKeyCount.get(name));
+            } else {
+                playerScore.put("keys", 0);
+            }
+            playerScoreList.put(playerScore);
+        }
+        endGame.put("scores", playerScoreList);
+        return endGame;
+    }
+
 
     //need to add message
     public JSONObject generatePlayerUpdate(int id) throws JSONException {
-        if (expelledPlayers.contains(String.valueOf(id))) {
+        if (expelledPlayers.contains(playerUsernames.get(id))) {
             return null;
         }
-        if (exitedPlayers.contains(String.valueOf(id))) {
+        if (exitedPlayers.contains(playerUsernames.get(id))) {
             return null;
         }
         JSONObject playerUpdate = new JSONObject();
@@ -804,14 +972,15 @@ public class GameManager {
         for (String s : actors.keySet()) {
             if (!s.equals(String.valueOf(id))) {
                 Integer index = Integer.parseInt(s);
+                String name = playerUsernames.get(id);
                 //the actor is an alive player
-                if (!expelledPlayers.contains(s) && index <playerUsernames.size()) {
+                if (!expelledPlayers.contains(name) && !exitedPlayers.contains(name) && index <playerUsernames.size()) {
                     JSONObject playerObject = new JSONObject();
                     playerObject.put("type", "player");
                     playerObject.put("name", playerUsernames.get(index));
                     playerObject.put("position", positionToArray(actors.get(s)));
                     result.put(playerObject);
-                } else if (!expelledPlayers.contains(s)) {
+                } else if (!expelledPlayers.contains(name)&& !exitedPlayers.contains(name)) {
                     JSONObject adversaryObject = new JSONObject();
                     adversaryObject.put("type", determineAdversaryType(s));
                     adversaryObject.put("name", s);
@@ -878,6 +1047,18 @@ public class GameManager {
         JSONArray result = new JSONArray();
         result.put(p.getx());
         result.put(p.gety());
+        return result;
+    }
+
+    public int[][] copyofArray(int[][] ascii) {
+        int[][] result = new int[ascii.length][ascii.length];
+        for (int i=0;i<ascii.length;i++) {
+            for (int j=0;j<ascii.length;j++) {
+                result[i][j] = ascii[i][j];
+            }
+        }
+
+
         return result;
     }
 

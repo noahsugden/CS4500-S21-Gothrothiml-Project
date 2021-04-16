@@ -1,11 +1,5 @@
 import java.io.*;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,8 +48,25 @@ public class SnarlServer {
     sendStartLevel();
     sendPlayerUpdates();
     while (true) {
-      playOneRound();
+      if (observe) {
+        this.gameManager.observe();
+      }
+      while (!this.gameManager.levelEnd) {
+        playOneRound();
+      }
+      JSONObject endLevel = generateEndLevel();
+      sendPlayersJson(endLevel);
+      if (this.gameManager.isLastLevel()) {
+        break;
+      }
+      this.gameManager.startNewLevel();
+      sendStartLevel();
+      sendPlayerUpdates();
     }
+    JSONObject endGame = this.gameManager.generateEndGame();
+    sendPlayersJson(endGame);
+    disconnectAll();
+
   }
 
   /**
@@ -113,41 +124,93 @@ public class SnarlServer {
 
   public void playOneRound() throws IOException, JSONException {
     for (int i=0;i<clients.size();i++) {
+        if (!gameManager.isClientInActive(i)) {
+        Socket client = clients.get(i);
+        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
+                client.getOutputStream()));
+        in = new DataInputStream(new BufferedInputStream(client.getInputStream()));
+        try {
+          out.writeChars("move");
+          out.flush();
+          String response = readJsonObject(in);
+          Position move = transformMove(response);
+          String result = this.gameManager.performOneMove(i, move);
+          while (result.equals("Invalid")) {
+            try {
+              out.writeChars("move");
+              out.flush();
+              response = readJsonObject(in);
+              move = transformMove(response);
+              result = this.gameManager.performOneMove(i, move);
+              out.writeChars(result);
+              out.flush();
+            } catch (Exception e) {
+              if (e instanceof SocketException) {
+                System.out.print(usernames.get(i)+" has disconnected...");
+              } else if (e instanceof EOFException) {
+                System.out.print(usernames.get(i)+" has disconnected...");
+              }
+              else {
+                e.printStackTrace();
+              }
+              System.exit(0);
+
+            }
+          }
+          out.writeChars(result);
+          out.flush();
+          this.sendPlayerUpdates();
+          if (observe) {
+            this.gameManager.observe();
+          }
+
+
+        } catch (Exception e) {
+          if (e instanceof SocketException) {
+            System.out.print(usernames.get(i)+" has disconnected...");
+          }
+          else if (e instanceof EOFException) {
+            System.out.print(usernames.get(i)+" has disconnected...");
+          }
+            else {
+              e.printStackTrace();
+          }
+          System.exit(0);
+
+        }
+      }
+    }
+     if (!this.gameManager.levelEnd) {
+       playAdversaryRound();
+       if (observe) {
+         this.gameManager.observe();
+       }
+     }
+
+  }
+
+  public void disconnectAll() throws IOException {
+    for (Socket client:clients) {
+      client.close();
+    }
+    System.out.print("=====The game is over.=====" +"\n");
+  }
+
+  public void sendPlayersJson(JSONObject jsonObject) throws IOException {
+    for (int i=0;i<clients.size();i++) {
       Socket client = clients.get(i);
       DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
               client.getOutputStream()));
       try {
-        out.writeChars("move");
+        out.writeChars(jsonObject.toString());
+      //  System.out.print(jsonObject.toString());
         out.flush();
-        String response = readJsonObject(in);
-        Position move = transformMove(response);
-        String result = this.gameManager.performOneMove(i, move);
-        while (result.equals("Invalid")) {
-          out.writeChars("move");
-          out.flush();
-          response = readJsonObject(in);
-          move = transformMove(response);
-          result = this.gameManager.performOneMove(i, move);
-          out.writeChars(result);
-          out.flush();
-        }
-        out.writeChars(result);
-        out.flush();
-        this.sendPlayerUpdates();
-        if (this.gameManager.levelEnd) {
-          JSONObject endLevel = generateEndLevel();
-          out.writeChars(endLevel.toString());
-          out.flush();
-        }
       } catch (Exception e) {
         e.printStackTrace();
       }
-
-
     }
-    playAdversaryRound();
-
   }
+
 
   public void playAdversaryRound() throws IOException, JSONException {
     this.gameManager.updateAdversaries();
@@ -155,13 +218,17 @@ public class SnarlServer {
     ArrayList<Ghost> ghosts = this.gameManager.getGhosts();
     for (int i=0;i< zombies.size();i++) {
       Zombie zombie = zombies.get(i);
-      this.gameManager.adversaryMove(zombie);
-      this.sendPlayerUpdates();
+      if (!this.gameManager.levelEnd) {
+        this.gameManager.adversaryMove(zombie);
+        this.sendPlayerUpdates();
+      }
     }
     for (int i=0;i<ghosts.size();i++) {
       Ghost ghost = ghosts.get(i);
-      this.gameManager.adversaryMove(ghost);
-      this.sendPlayerUpdates();
+      if (!this.gameManager.levelEnd) {
+        this.gameManager.adversaryMove(ghost);
+        this.sendPlayerUpdates();
+      }
     }
   }
 
@@ -169,8 +236,13 @@ public class SnarlServer {
     JSONObject result = new JSONObject();
     result.put("type", "end-level");
     String keyPlayer = this.gameManager.keyPlayer;
-    String keyName = usernames.get(Integer.parseInt(keyPlayer));
-    result.put("key", keyName);
+    if (keyPlayer.equals("")) {
+      result.put("key", JSONObject.NULL);
+    } else {
+      String keyName = usernames.get(Integer.parseInt(keyPlayer));
+      result.put("key", keyName);
+    }
+
     ArrayList<String> expelledPlayers = this.gameManager.expelledPlayers;
     ArrayList<String> exitedPlayers =this.gameManager.exitedPlayers;
 
@@ -255,7 +327,7 @@ public class SnarlServer {
               client.getOutputStream()));
       try {
         out.writeChars(playerUpdate.toString());
-        System.out.print(playerUpdate.toString());
+       // System.out.print(playerUpdate.toString());
         out.flush();
       } catch (Exception e) {
         e.printStackTrace();
@@ -288,8 +360,6 @@ public class SnarlServer {
       } catch (JSONException e){
         curr = in.readChar();
       }
-
-
     }
     throw new Exception("Not a valid string");
   }
@@ -299,7 +369,7 @@ public class SnarlServer {
 
   public static void main(String[] args) throws IOException, JSONException {
     String fileName = "snarl.levels";
-    int clientMax = 1;
+    int clientMax = 4;
     int wait = 60;
     int port = 45678;
     String address = "127.0.0.1";

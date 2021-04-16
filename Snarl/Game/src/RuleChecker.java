@@ -220,7 +220,8 @@ public class RuleChecker {
 
     }
 
-    public static boolean isValidPlayerMoveTest(String name, Position current, Position move, HashMap<String, Position> playerPositions) {
+    public static boolean isValidPlayerMoveTest(String name, Position current, Position move,
+                                                HashMap<String, Position> playerPositions, ArrayList<String> inActivePlayers) {
        if (move.equals(new Position(-1, -1))) {
            return true;
        }
@@ -233,7 +234,12 @@ public class RuleChecker {
             temp = calculate1Cardinal(firstCardinal.get(i));
             possiblePositions.addAll(temp);
         }
-        return possiblePositions.contains(move) && !playerPositions.containsValue(move);
+        for (String s:playerPositions.keySet()) {
+            if (move.equals(playerPositions.get(s))&&!inActivePlayers.contains(s)) {
+                return false;
+            }
+        }
+        return possiblePositions.contains(move);
 
     }
 
