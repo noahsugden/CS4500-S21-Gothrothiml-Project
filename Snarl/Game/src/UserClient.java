@@ -62,16 +62,16 @@ public class UserClient implements User{
           next = readJsonObject(in);
         }
         respond(next);
-
         while (client.getKeepAlive()) {
-          next = readJsonObject(in);
-          respond(next);
+          try {
+            next = readJsonObject(in);
+            respond(next);
+          } catch (EOFException e) {
+            System.out.println("=====The games are over.=====");
+            client.setKeepAlive(false);
+          }
         }
         client.close();
-
-
-
-
       } catch (Exception e) {
         if (e instanceof SocketException) {
           System.out.print("The server has disconnected");
@@ -79,7 +79,6 @@ public class UserClient implements User{
           e.printStackTrace();
         }
       }
-
     } catch (Exception e) {
       if (e instanceof SocketException) {
         System.out.print("The server has disconnected");
@@ -126,10 +125,24 @@ public class UserClient implements User{
         break;
       case "end-game":
         printEndGame(json);
-        client.setKeepAlive(false);
 
+      //  client.setKeepAlive(false);
+        break;
+      case "leaderboard":
+        printLeaderboard(json);
         break;
     }
+  }
+
+  public void printLeaderboard(String json) throws JSONException {
+    JSONObject leaderboard = new JSONObject(json);
+    JSONArray ranking = leaderboard.getJSONArray("ranking");
+    System.out.println("=====Leaderboard=====");
+    for (int i=0;i<ranking.length();i++) {
+      String username = ranking.getString(i);
+      System.out.println(i+1 +": "+username);
+    }
+    System.out.println("=====================");
   }
 
   public void printEndGame(String json) throws JSONException {
@@ -410,7 +423,8 @@ public class UserClient implements User{
   }
 
   public String readJsonObject(DataInputStream in) throws Exception {
-    Character curr = in.readChar();
+      Character curr = in.readChar();
+
     StringBuilder valid = new StringBuilder();
     while(curr != '\0') {
       valid.append(curr);

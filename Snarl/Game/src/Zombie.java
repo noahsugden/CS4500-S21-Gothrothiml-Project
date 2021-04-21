@@ -3,7 +3,7 @@ import java.util.HashMap;
 
 public class Zombie extends Adversary {
   int cardinalMoves;
-  HashMap<Position, Integer> levelLayout;
+  HashMap<Position, Integer> levelLayout; 
   HashMap<String, Position> playerPositions;
   HashMap<String, Position> adversaryPositions;
   Position currentPosition;

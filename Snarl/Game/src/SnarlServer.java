@@ -1,8 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,6 +15,10 @@ public class SnarlServer {
   int wait;
   boolean observe;
   ArrayList<String> usernames = new ArrayList<>();
+  HashMap<String, Integer> playerKeyCountSum = new HashMap<>();
+  HashMap<String, Integer> playerExitCountSum = new HashMap<>();
+  HashMap<String, Integer> playerEjectCountSum = new HashMap<>();
+  HashMap<String, Integer> playerScore = new HashMap<>();
   GameManager gameManager;
   Socket socket;
   DataOutputStream out;
@@ -44,6 +47,20 @@ public class SnarlServer {
     startServer(endpoint);
     acceptClients();
     System.out.println("Clients have been accepted..."+"\n");
+    String command = "";
+
+    while (!command.equals("exit")) {
+      startOneGame();
+      Scanner sc = new Scanner(System.in);
+      command = sc.nextLine();
+    }
+
+
+    disconnectAll();
+
+  }
+
+  public void startOneGame() throws IOException, JSONException {
     this.gameManager = new GameManager(fileName, usernames);
     sendStartLevel();
     sendPlayerUpdates();
@@ -63,12 +80,13 @@ public class SnarlServer {
       sendStartLevel();
       sendPlayerUpdates();
     }
-    JSONObject endGame = this.gameManager.generateEndGame();
-    sendPlayersJson(endGame);
-    disconnectAll();
+
+      JSONObject endGame = this.gameManager.generateEndGame();
+      sendPlayersJson(endGame);
+      JSONObject leaderboard = generateLeaderBoard();
+      sendPlayersJson(leaderboard);
 
   }
-
   /**
    * Starts a server based on an endpoint
    * @param endpoint the ip address and the port
@@ -364,6 +382,118 @@ public class SnarlServer {
     throw new Exception("Not a valid string");
   }
 
+  public JSONObject generateLeaderBoard() throws JSONException{
+    HashMap<String, Integer> playerKeyCount = this.gameManager.playerKeyCount;
+    HashMap<String, Integer> playerExitCount = this.gameManager.playerExitCount;
+    HashMap<String, Integer> playerEjectCount = this.gameManager.playerEjectCount;
+    //The player's score will be keyCount +exitCount -ejectCount.
+    JSONObject leaderBoard = new JSONObject();
+    leaderBoard.put("type", "leaderboard");
+
+
+    for (int i=0;i<usernames.size();i++) {
+      Integer keyCount =0;
+      Integer exitCount=0;
+      Integer ejectCount =0;
+      Integer totalScore =0;
+      String index = String.valueOf(i);
+      if (playerKeyCount.containsKey(index)) {
+        keyCount = playerKeyCount.get(index);
+      }
+      if (playerExitCount.containsKey(index)) {
+        exitCount = playerExitCount.get(index);
+      } else {
+
+      }
+      if (playerEjectCount.containsKey(index)) {
+        ejectCount = playerEjectCount.get(index);
+      } else {
+
+      }
+      String username = usernames.get(i);
+      if (playerKeyCountSum.containsKey(username)) {
+        Integer keyPrev = playerKeyCountSum.get(username);
+        playerKeyCountSum.put(username, keyCount +keyPrev);
+        totalScore += keyCount+keyPrev;
+      } else {
+        playerKeyCountSum.put(username, keyCount);
+        totalScore +=keyCount;
+      }
+      if (playerExitCountSum.containsKey(username)) {
+        Integer exitPrev = playerExitCountSum.get(username);
+        playerExitCountSum.put(username, exitCount +exitPrev);
+        totalScore +=exitCount+exitPrev;
+      } else {
+        playerExitCountSum.put(username, exitCount);
+        totalScore +=exitCount;
+      }
+      if (playerEjectCountSum.containsKey(username)) {
+        Integer ejectPrev = playerEjectCountSum.get(username);
+        playerEjectCountSum.put(username, ejectCount +ejectPrev);
+        totalScore -=ejectCount+ejectPrev;
+      } else {
+        playerEjectCountSum.put(username, ejectCount);
+        totalScore -= ejectCount;
+      }
+
+      playerScore.put(username,totalScore);
+
+
+    }
+
+    ArrayList<Integer> scores = new ArrayList<>(playerScore.values());
+    Collections.sort(scores);
+    Collections.reverse(scores);
+
+    ArrayList<String> rank = new ArrayList<>();
+    for (int i=0;i<scores.size();i++) {
+      Set<String> rankTemp = getKeysByValue(playerScore, scores.get(i));
+      for (String username:rankTemp) {
+        if (!rank.contains(username)) {
+          rank.add(username);
+        }
+      }
+    }
+
+    JSONArray playerRanking = new JSONArray();
+    for (int i=0;i<rank.size();i++) {
+      playerRanking.put(rank.get(i));
+    }
+    leaderBoard.put("ranking", playerRanking);
+
+
+
+
+/*
+    Map.Entry<String, Integer> maxEntry = null;
+    for (Map.Entry<String, Integer> entry: playerScore.entrySet())
+    {
+      if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+      {
+        maxEntry = entry;
+      }
+    }
+
+ */
+
+
+
+
+
+
+
+    return leaderBoard;
+  }
+
+  public static <T, E> Set<T> getKeysByValue(Map<T, E> map, E value) {
+    Set<T> keys = new HashSet<T>();
+    for (Map.Entry<T, E> entry : map.entrySet()) {
+      if (Objects.equals(value, entry.getValue())) {
+        keys.add(entry.getKey());
+      }
+    }
+    return keys;
+  }
 
 
 

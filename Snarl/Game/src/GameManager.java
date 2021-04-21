@@ -6,8 +6,6 @@ import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 
-// Unit tests for our GameManager are pointless at this point, since it is very likely that it will
-// change. Once we incorporate networking, we will implement the unit tests.
 
 /**
  * The game manager needs to have components for the following
@@ -923,6 +921,8 @@ public class GameManager {
         endGame.put("scores", playerScoreList);
         return endGame;
     }
+
+
 
 
     //need to add message
