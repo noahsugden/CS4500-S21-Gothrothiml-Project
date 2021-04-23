@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 public class GameManager {
 
 
+    JSONArray jsonLevels = new JSONArray();
     static ArrayList<String> playerUsernames = new ArrayList<>();
     static ArrayList<String> adversaryUsernames;
     ArrayList<String> expelledPlayers = new ArrayList<>();
@@ -30,6 +31,8 @@ public class GameManager {
     HashMap<String, Integer> playerExitCount;
     HashMap<String, Integer> playerKeyCount;
     HashMap<String, Integer> playerEjectCount;
+    int zombieClientNumber =0;
+    int ghostClientNumber=0;
     boolean levelEnd;
     static int turnNumber;
     static HashMap<Position, Integer> levelLayout;
@@ -79,12 +82,37 @@ public class GameManager {
         ruleChecker = new RuleChecker(levels.get(currentLevelIndex));
 
     }
-
     GameManager(String fileName, ArrayList<String> usernames) throws IOException {
         playerUsernames = usernames;
         playerNumber = playerUsernames.size();
         levels = generateLevels(fileName);
         currentLevelIndex = 0;
+        l = levels.get(currentLevelIndex);
+        levelLayout = l.getLevelLayout();
+        createAdversaries(currentLevelIndex);
+        for (int i=0;i<playerNumber;i++) {
+            Player temp = new Player(i);
+            players.add(temp);
+        }
+        playerIDpositions = new HashMap<>();
+        adversaryIDpositions = new HashMap<>();
+        generateInitialPositions(currentLevelIndex);
+        ruleChecker = new RuleChecker(levels.get(currentLevelIndex));
+        currentGameState = new GameState(playerIDpositions, adversaryIDpositions,
+                levels.get(currentLevelIndex), zombieNumber );
+        updateAdversaries();
+        playerKeyCount = new HashMap<>();
+        playerExitCount = new HashMap<>();
+        playerEjectCount = new HashMap<>();
+    }
+
+    GameManager(String fileName, ArrayList<String> usernames, int zombieClientNumber, int ghostClientNumber) throws IOException {
+        playerUsernames = usernames;
+        playerNumber = playerUsernames.size();
+        levels = generateLevels(fileName);
+        currentLevelIndex = 0;
+        this.zombieClientNumber = zombieClientNumber;
+        this.ghostClientNumber = ghostClientNumber;
         l = levels.get(currentLevelIndex);
         levelLayout = l.getLevelLayout();
         createAdversaries(currentLevelIndex);
@@ -138,8 +166,14 @@ public class GameManager {
     public void createAdversaries(Integer currentLevelIndex) {
         zombies = new ArrayList<>();
         ghosts = new ArrayList<>();
-        zombieNumber = currentLevelIndex/2 +1;
-        ghostNumber = (currentLevelIndex-1)/2;
+        zombieNumber = currentLevelIndex / 2 + 1;
+        ghostNumber = (currentLevelIndex - 1) / 2;
+        if (zombieClientNumber>zombieNumber) {
+            zombieNumber = zombieClientNumber;
+        }
+        if (ghostClientNumber>ghostNumber) {
+            ghostNumber = ghostClientNumber;
+        }
         for (int i=0;i<zombieNumber;i++) {
             Zombie temp = new Zombie(playerNumber+i);
             zombies.add(temp);
@@ -159,6 +193,8 @@ public class GameManager {
             ghosts.get(i).setMaps(currentGameState);
         }
     }
+
+
 
     public JSONObject generateStartLevel() throws JSONException {
         JSONObject startLevel = new JSONObject();
@@ -522,6 +558,8 @@ public class GameManager {
     }
      */
 
+
+
     /**
      * Gets visible area to the Player in the given Position
      *
@@ -830,6 +868,8 @@ public class GameManager {
         return l;
     }
 
+
+
     public ArrayList<Level> generateLevels(String fileName) throws IOException {
         ArrayList<Level> levels = new ArrayList<>();
         String currentPath = System.getProperty("user.dir");
@@ -846,6 +886,8 @@ public class GameManager {
                 temp = bufferedReader.readLine();
                 Level level = readLevel(tempLevel);
                 levels.add(level);
+                JSONObject tempLevelObject = new JSONObject(tempLevel);
+                jsonLevels.put(tempLevelObject);
                 currentLevel = new StringBuilder();
             } catch (JSONException ignored) {
 
@@ -922,6 +964,41 @@ public class GameManager {
         return endGame;
     }
 
+
+    public JSONObject generateAdversaryUpdate(int id) throws JSONException {
+        JSONObject adversaryUpdate= new JSONObject();
+        adversaryUpdate.put("type", "adversary-update");
+        JSONArray playerPositions = new JSONArray();
+        JSONArray adversaryPositions = new JSONArray();
+        HashMap<String, Position> playerPositionsMap = currentGameState.getPlayerPositionsMap();
+        HashMap<String, Position> adversaryPositionsMap = currentGameState.getAdversaryPositionsMap();
+        for (String s:playerPositionsMap.keySet()) {
+            Position curr = playerPositionsMap.get(s);
+            JSONArray positionArray = new JSONArray();
+            positionArray.put(curr.getx());
+            positionArray.put(curr.gety());
+            playerPositions.put(positionArray);
+        }
+        for (String s:adversaryPositionsMap.keySet()) {
+            Position curr = adversaryPositionsMap.get(s);
+            JSONArray positionArray = new JSONArray();
+            positionArray.put(curr.getx());
+            positionArray.put(curr.gety());
+            adversaryPositions.put(positionArray);
+        }
+        adversaryUpdate.put("players", playerPositions);
+        adversaryUpdate.put("adversaries", adversaryPositions);
+        JSONArray current = new JSONArray();
+        Position curr = adversaryPositionsMap.get(String.valueOf(playerNumber+id));
+        current.put(curr.getx());
+        current.put(curr.gety());
+        adversaryUpdate.put("position", current);
+
+
+
+
+        return adversaryUpdate;
+    }
 
 
 
@@ -1021,6 +1098,29 @@ public class GameManager {
             }
         }
         return objectArray;
+    }
+
+    public JSONArray getWholeLevelLayout() {
+        int[][] levelLayout = l.get2Darray();
+        JSONArray result = new JSONArray();
+        for (int i = 0; i < levelLayout.length; i++) {
+            JSONArray curr = new JSONArray();
+            for (int j = 0; j < levelLayout.length; j++) {
+                if (levelLayout[i][j] == 1) {
+                    curr.put(0);
+                } else if (levelLayout[i][j] == 2 || levelLayout[i][j] == 7 || levelLayout[i][j] == 8
+                        || levelLayout[i][j] == 5 || levelLayout[i][j] == 6) {
+                    curr.put(1);
+                } else if (levelLayout[i][j] == 4) {
+                    curr.put(2);
+                } else {
+                    curr.put(0);
+                }
+            }
+            result.put(curr);
+        }
+        return result;
+
     }
 
     public JSONArray getTileLayout(Position pos) {

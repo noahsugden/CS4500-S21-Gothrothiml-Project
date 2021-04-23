@@ -24,6 +24,7 @@ public class UserClient implements User{
   Socket client;
   BufferedReader inUser;
   DataOutputStream out;
+  DataInputStream in;
 
   public UserClient(String name, List<Object> inventories, List<String> abilities) {
     this.name = name;
@@ -37,7 +38,7 @@ public class UserClient implements User{
     try {
       client = new Socket(address, port);
 
-      DataInputStream in = new DataInputStream(new BufferedInputStream(client.getInputStream()));
+      in = new DataInputStream(new BufferedInputStream(client.getInputStream()));
       inUser = new BufferedReader(new InputStreamReader(System.in));
       out = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
 

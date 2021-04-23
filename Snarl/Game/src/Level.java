@@ -20,7 +20,10 @@ public class Level {
   Position exit;
   static boolean finalLevel;
   //use 2d array to print
-  int[][] ascii = new int[30][30];
+
+  int rightMostX;
+  int rightMostY;
+  int[][] ascii;
   //an example of level data
 
     //true for unlocked
@@ -276,11 +279,15 @@ public class Level {
     }
     this.exit = e;
     this.putLevelLayout();
-    this.fill2DArray();
     for (int i = 0; i < r.size(); i++) {
       HashMap<Position, Integer> curr = r.get(i).getRoomLayout();
       roomLayouts.add(curr);
     }
+    Position rightBottom = this.findRightMost();
+    rightMostX = rightBottom.getx();
+    rightMostY = rightBottom.gety();
+    ascii = new int[rightMostY+5][rightMostX+5];
+    this.fill2DArray();
   }
 
 
@@ -548,6 +555,29 @@ public class Level {
     return temp;
   }
 
+  public Position findRightMost() {
+    Position min = new Position(-1, -1);
+    int bottomRightIndex = -1;
+    for (int i =0;i< rooms.size();i++) {
+      int minX = min.getx();
+      int minY = min.gety();
+      Room curr = rooms.get(i);
+      Position rightBottom = curr.getRightBottom();
+      int bottomX = rightBottom.getx() +curr.getWidth();
+      int bottomY = rightBottom.gety() +curr.getHeight();
+      if (minX== -1 && minY == -1) {
+        min = rightBottom;
+        bottomRightIndex = i;
+      } else if (minX <bottomX && minY<bottomY) {
+        min = rightBottom;
+        bottomRightIndex = i;
+      }
+    }
+    Room bottomRightRoom = rooms.get(bottomRightIndex);
+
+
+    return bottomRightRoom.getRightBottom();
+  }
 
 
   /**

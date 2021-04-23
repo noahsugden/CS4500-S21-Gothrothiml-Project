@@ -10,6 +10,8 @@ import org.json.JSONObject;
 public class SnarlServer {
   ServerSocket server;
   ArrayList<Socket> clients;
+  ArrayList<Socket> zombieClients = new ArrayList<>();
+  ArrayList<Socket> ghostClients = new ArrayList<>();
   String fileName;
   int clientMax;
   int wait;
@@ -23,6 +25,8 @@ public class SnarlServer {
   Socket socket;
   DataOutputStream out;
   DataInputStream in;
+  String zombieCode = "1334624065";
+  String ghostCode = "7597977791";
 
 
   /**
@@ -61,9 +65,14 @@ public class SnarlServer {
   }
 
   public void startOneGame() throws IOException, JSONException {
-    this.gameManager = new GameManager(fileName, usernames);
+    if (zombieClients.size() !=0 || ghostClients.size() !=0) {
+      this.gameManager = new GameManager(fileName, usernames, zombieClients.size(), ghostClients.size());
+    } else {
+      this.gameManager = new GameManager(fileName, usernames);
+    }
     sendStartLevel();
     sendPlayerUpdates();
+    sendAdversaryUpdates();
     while (true) {
       if (observe) {
         this.gameManager.observe();
@@ -121,14 +130,15 @@ public class SnarlServer {
           //sends the welcome json to the client
           out.writeChars(welcomeJson.toString());
           out.flush();
+          clients.add(socket);
           //request for a username from the client
-          requestUsername(out,in);
+          requestUsername(out,in, socket);
         } catch(Exception e) {
           e.printStackTrace();
         }
-        clients.add(socket);
+
         server.setSoTimeout(this.wait * 1000);
-        if(clients.size() == this.clientMax) {
+        if(clients.size() == this.clientMax && zombieClients.size()+ghostClients.size()==1) {
           break;
         }
       }
@@ -303,10 +313,18 @@ public class SnarlServer {
    * @param in
    * @throws Exception
    */
-  public void requestUsername(DataOutputStream out, DataInputStream in) throws Exception {
+  public void requestUsername(DataOutputStream out, DataInputStream in, Socket socket) throws Exception {
     out.writeChars("name");
     out.flush();
     String username = readName(in);
+    if (username.equals(zombieCode)) {
+      clients.remove(socket);
+      zombieClients.add(socket);
+      return;
+    } else if (username.equals(ghostCode)) {
+      clients.remove(socket);
+      ghostClients.add(socket);
+    }
     while (true) {
       if (!usernames.contains(username)) {
         break;
@@ -327,6 +345,51 @@ public class SnarlServer {
               client.getOutputStream()));
       try {
         out.writeChars(startLevel.toString());
+        out.flush();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    for (Socket zombie:zombieClients) {
+      JSONObject adversaryLevel = new JSONObject();
+      adversaryLevel.put("type", "adversary-level");
+      adversaryLevel.put("levels", this.gameManager.jsonLevels);
+      DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
+              zombie.getOutputStream()));
+      try {
+        out.writeChars(adversaryLevel.toString());
+        out.flush();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public void sendAdversaryUpdates() throws JSONException, IOException {
+    for (int i=0;i< zombieClients.size();i++) {
+      Socket zombie = zombieClients.get(i);
+      JSONObject zombieUpdate = this.gameManager.generateAdversaryUpdate(i);
+      out = new DataOutputStream(new BufferedOutputStream(
+              zombie.getOutputStream()));
+      try {
+        out.writeChars(zombieUpdate.toString());
+        // System.out.print(playerUpdate.toString());
+        out.flush();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+
+    }
+
+    for (int i=0;i< ghostClients.size();i++) {
+      Socket ghost = ghostClients.get(i);
+      JSONObject ghostUpdate = this.gameManager.generateAdversaryUpdate(zombieClients.size()+i);
+      out = new DataOutputStream(new BufferedOutputStream(
+              ghost.getOutputStream()));
+      try {
+        out.writeChars(ghostUpdate.toString());
+        // System.out.print(playerUpdate.toString());
         out.flush();
       } catch (Exception e) {
         e.printStackTrace();
