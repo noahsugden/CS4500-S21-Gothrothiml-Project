@@ -10,6 +10,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This class represents the client for a player.
+ */
 public class UserClient implements User{
 
   String name;
@@ -33,6 +36,11 @@ public class UserClient implements User{
   }
 
 
+  /**
+   * The constructor for a UserClient.
+   * @param address a string representing the address
+   * @param port an int representing the port
+   */
   public UserClient(String address, int port) {
 
     try {
@@ -90,6 +98,11 @@ public class UserClient implements User{
 
   }
 
+  /**
+   * Responds to the given string representing a JSON.
+   * @param json a string representing a JSON
+   * @throws Exception if there is an error with the JSON
+   */
   public void respond(String json) throws Exception {
     switch(json){
       case "move":
@@ -135,6 +148,11 @@ public class UserClient implements User{
     }
   }
 
+  /**
+   * Prints the Leader Board of the entire game.
+   * @param json a string representing a JSON
+   * @throws JSONException if there is an error with the JSON
+   */
   public void printLeaderboard(String json) throws JSONException {
     JSONObject leaderboard = new JSONObject(json);
     JSONArray ranking = leaderboard.getJSONArray("ranking");
@@ -146,6 +164,11 @@ public class UserClient implements User{
     System.out.println("=====================");
   }
 
+  /**
+   * Prints the End Game information.
+   * @param json a string representing a JSON
+   * @throws JSONException if there is an error with the JSON
+   */
   public void printEndGame(String json) throws JSONException {
     JSONObject endGame = new JSONObject(json);
     System.out.print("The game is over."+"\n");
@@ -162,6 +185,11 @@ public class UserClient implements User{
     }
   }
 
+  /**
+   * Prints the End Level information.
+   * @param json a string representing a JSON
+   * @throws JSONException if there is an error with the JSON
+   */
   public void printEndLevel(String json) throws JSONException {
     JSONObject endLevel = new JSONObject(json);
     System.out.print("The level has ended."+"\n");
@@ -181,6 +209,11 @@ public class UserClient implements User{
     }
   }
 
+  /**
+   * Gets a valid move from the user.
+   * @return a Position representing the valid move from the user
+   * @throws Exception if there is an error with the inputs/outputs
+   */
   public Position getValidMove() throws Exception {
     Position prev = current;
     printDirections();
@@ -207,16 +240,28 @@ public class UserClient implements User{
 
   }
 
+  /**
+   * Determines if the given direction is valid.
+   * @param direction a string representing the direction
+   * @return a boolean determining if the direction is valid
+   */
   public boolean isValidDirection(String direction) {
     return !direction.equals("left")&&!direction.equals("right")&&
             !direction.equals("down")&&!direction.equals("up")&&!direction.equals("stay");
   }
 
+  /**
+   * Prints the direction prompts.
+   */
   public void printDirections() {
     System.out.print("Please type in the direction you want to go:"+"\n");
     System.out.print("left/right/up/down/stay"+"\n");
   }
 
+  /**
+   * Sends the next move.
+   * @throws Exception if there is an issue with the JSON or inputs/outputs.
+   */
   public void sendMove() throws Exception {
 
     Position move = getValidMove();
@@ -226,6 +271,13 @@ public class UserClient implements User{
 
   }
 
+  /**
+   * Generates a the next move Position given the desired direction and previous Position.
+   * @param direction a string representing the desired direction
+   * @param prev the previous Position
+   * @return the next move Position
+   * @throws Exception if the direction is invalid
+   */
   public Position generateNextMove(String direction, Position prev) throws Exception {
     int x = prev.getx();
     int y = prev.gety();
@@ -244,6 +296,12 @@ public class UserClient implements User{
     throw new Exception("invalid direction!"+"\n");
   }
 
+  /**
+   * Generates the next move JSON object given the next move Position.
+   * @param move the next move Position
+   * @return the next move JSON
+   * @throws JSONException if there is an error with the JSON
+   */
   public JSONObject generateNextMove(Position move) throws JSONException {
     JSONObject playerMove = new JSONObject();
     playerMove.put("type", "move");
@@ -261,6 +319,11 @@ public class UserClient implements User{
 
   }
 
+  /**
+   * Prints the Player Update.
+   * @param json a string representing a JSON
+   * @throws JSONException if there is an issue with the JSON
+   */
   public void printPlayerUpdate(String json) throws JSONException {
     JSONObject object = new JSONObject(json);
     JSONArray layout  = object.getJSONArray("layout");
@@ -284,6 +347,14 @@ public class UserClient implements User{
 
   }
 
+  /**
+   * Adds the actors to the ascii 2D array.
+   * @param ascii a 2D array of the game
+   * @param position a JSON array representing a Position
+   * @param actors a JSON array of the actors
+   * @return the ascii 2D array
+   * @throws JSONException if there is an issues with the JSON
+   */
   public int[][] addActors(int[][] ascii, JSONArray position, JSONArray actors) throws JSONException {
     Integer x = position.getInt(0);
     Integer y = position.getInt(1);
@@ -305,6 +376,14 @@ public class UserClient implements User{
     return ascii;
   }
 
+  /**
+   * Adds the key and exit to the ascii 2D array.
+   * @param ascii a 2D array of the game
+   * @param position a JSON array representing a Position
+   * @param objects a JSON array containing the key and exit JSON objects
+   * @return the ascii 2D array
+   * @throws JSONException if there is an issue with the JSON
+   */
   public int[][] addObjects(int[][] ascii, JSONArray position, JSONArray objects) throws JSONException {
     Integer x = position.getInt(0);
     Integer y = position.getInt(1);
@@ -325,6 +404,12 @@ public class UserClient implements User{
     return ascii;
   }
 
+  /**
+   * Generates the ascii layout.
+   * @param layout a JSON array representing the layout
+   * @return the ascii 2D array
+   * @throws JSONException if there is an issue with the JSON
+   */
   public int[][] generateLayout(JSONArray layout) throws JSONException {
     int[][] ascii = new int[5][5];
     for (int i = 0; i < layout.length(); i++) {
@@ -348,6 +433,10 @@ public class UserClient implements User{
     return ascii;
   }
 
+  /**
+   * Prints the ascii 2D array.
+   * @param ascii the ascii 2D array
+   */
   public void printAscii(int[][] ascii) {
     for (int[] x : ascii)
     {
@@ -399,6 +488,11 @@ public class UserClient implements User{
   }
 
 
+  /**
+   * Prints the start level information.
+   * @param json a string representing a JSON
+   * @throws JSONException if there is an issue with the JSON
+   */
   public void printStartLevel(String json) throws JSONException {
     JSONObject object = new JSONObject(json);
     int natural = object.getInt("level");
@@ -418,11 +512,23 @@ public class UserClient implements User{
   }
 
 
+  /**
+   * Turns the given string into a JSON object and returns its type as a string.
+   * @param json a string representing a JSON
+   * @return a string representing the type of the JSON object
+   * @throws JSONException if there is an issue with the JSON
+   */
   public String determineJsonObject(String json) throws JSONException {
     JSONObject object = new JSONObject(json);
      return object.getString("type");
   }
 
+  /**
+   * Reads the JSON object from in and returns the valid string.
+   * @param in represents the DataInputStream
+   * @return the valid string
+   * @throws Exception if the string is not valid
+   */
   public String readJsonObject(DataInputStream in) throws Exception {
       Character curr = in.readChar();
 
@@ -550,6 +656,10 @@ public class UserClient implements User{
     }
   }
 
+  /**
+   * This is the main method for the UserClient.
+   * @param args the given string arguments
+   */
   public static void main(String[] args) {
     int port = 45678;
     String address = "127.0.0.1";

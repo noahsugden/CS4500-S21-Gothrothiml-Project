@@ -7,6 +7,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * This class represents the server of the game.
+ */
 public class SnarlServer {
   ServerSocket server;
   ArrayList<Socket> clients;
@@ -30,15 +33,15 @@ public class SnarlServer {
 
 
   /**
-   * Constructor for a snarlserver
-   * @param fileName
-   * @param clientMax
-   * @param wait
-   * @param port
-   * @param address
-   * @param observe
-   * @throws UnknownHostException
-   * @throws JSONException
+   * Constructor for a SnarlServer.
+   * @param fileName a string representing the filename
+   * @param clientMax the maximum number of user clients allowed to connect
+   * @param wait the amount of time the server will wait for clients to connect
+   * @param port an int representing the port number
+   * @param address a string representing the address
+   * @param observe a boolean determining if the observe view should be displayed
+   * @throws UnknownHostException if it cannot find the host
+   * @throws JSONException if there is an error with the JSON
    */
   public SnarlServer(String fileName, int clientMax, int wait, int port, String address, boolean observe)
           throws IOException, JSONException {
@@ -64,6 +67,11 @@ public class SnarlServer {
 
   }
 
+  /**
+   * Starts one Snarl game.
+   * @throws IOException if there is an error with inputs/outputs
+   * @throws JSONException if there is an error with the JSON
+   */
   public void startOneGame() throws IOException, JSONException {
     if (zombieClients.size() !=0 || ghostClients.size() !=0) {
       this.gameManager = new GameManager(fileName, usernames, zombieClients.size(), ghostClients.size());
@@ -97,9 +105,9 @@ public class SnarlServer {
 
   }
   /**
-   * Starts a server based on an endpoint
+   * Starts a server based on an endpoint.
    * @param endpoint the ip address and the port
-   * @throws JSONException
+   * @throws JSONException if there is an error with the JSON
    */
   public void startServer(SocketAddress endpoint) throws JSONException {
     this.clients = new ArrayList<>();
@@ -113,8 +121,8 @@ public class SnarlServer {
   }
 
   /**
-   * accepts the clients based on the ClientMax number
-   * @throws JSONException
+   * Accepts the clients based on the ClientMax number.
+   * @throws JSONException if there is an error with the JSON
    */
   public void acceptClients() throws JSONException {
 
@@ -150,6 +158,11 @@ public class SnarlServer {
     }
   }
 
+  /**
+   * Plays one round of the game.
+   * @throws IOException if there is an error with the inputs/outputs
+   * @throws JSONException if there is an error with the JSON
+   */
   public void playOneRound() throws IOException, JSONException {
     for (int i=0;i<clients.size();i++) {
         if (!gameManager.isClientInActive(i)) {
@@ -217,6 +230,10 @@ public class SnarlServer {
 
   }
 
+  /**
+   * Disconnects all of the clients from the server, and prints a message that the game is over.
+   * @throws IOException if there is an error with the inputs/outputs
+   */
   public void disconnectAll() throws IOException {
     for (Socket client:clients) {
       client.close();
@@ -224,6 +241,11 @@ public class SnarlServer {
     System.out.print("=====The game is over.=====" +"\n");
   }
 
+  /**
+   * Sends the JSON object to the player clients as a string.
+   * @param jsonObject a JSON object : one of endgame, endlevel, leaderboard in startOneGame
+   * @throws IOException if there is an error with the inputs/outputs
+   */
   public void sendPlayersJson(JSONObject jsonObject) throws IOException {
     for (int i=0;i<clients.size();i++) {
       Socket client = clients.get(i);
@@ -239,7 +261,11 @@ public class SnarlServer {
     }
   }
 
-
+  /**
+   * Moves all of the ghosts and zombies in one round.
+   * @throws IOException if there is an error with the inputs/outputs
+   * @throws JSONException if there is an error with the JSON
+   */
   public void playAdversaryRound() throws IOException, JSONException {
     this.gameManager.updateAdversaries();
     ArrayList<Zombie> zombies = this.gameManager.getZombies();
@@ -260,6 +286,11 @@ public class SnarlServer {
     }
   }
 
+  /**
+   * Generates the end level JSON object that will be sent to the clients.
+   * @return the end level JSON
+   * @throws JSONException if there is an error with the JSON
+   */
   public JSONObject generateEndLevel() throws JSONException {
     JSONObject result = new JSONObject();
     result.put("type", "end-level");
@@ -292,6 +323,12 @@ public class SnarlServer {
   //HashMap<String, Integer> playerKeyCount = this.gameManager.playerKeyCount;
   //HashMap<String, Integer> playerExitCount = this.gameManager.playerExitCount;
 
+  /**
+   * Transforms the given string representing a JSON array into the move position.
+   * @param json a string representing a JSON array
+   * @return the move Position
+   * @throws JSONException if there is an error with the inputs/outputs
+   */
   public Position transformMove(String json) throws JSONException {
     JSONObject move = new JSONObject(json);
     Object to = move.get("to");
@@ -308,10 +345,10 @@ public class SnarlServer {
 
 
   /**
-   * requests for username from the client
-   * @param out
-   * @param in
-   * @throws Exception
+   * Requests the username from the client.
+   * @param out represents the DataOutputStream
+   * @param in represents the DataInputStream
+   * @throws Exception if there is an error with the inputs/outputs or the socket
    */
   public void requestUsername(DataOutputStream out, DataInputStream in, Socket socket) throws Exception {
     out.writeChars("name");
@@ -338,6 +375,11 @@ public class SnarlServer {
     System.out.print(username +" has registered." +"\n");
   }
 
+  /**
+   * Send the start level to the clients.
+   * @throws JSONException if there is an error with the JSON
+   * @throws IOException if there is an error with the inputs/outputs
+   */
   public void sendStartLevel() throws JSONException, IOException {
     JSONObject startLevel = this.gameManager.generateStartLevel();
     for (Socket client:clients) {
@@ -365,6 +407,11 @@ public class SnarlServer {
     }
   }
 
+  /**
+   * Sends updates to the remote adversaries.
+   * @throws JSONException if there is an error with the JSON
+   * @throws IOException if there is an error with the inputs/outputs
+   */
   public void sendAdversaryUpdates() throws JSONException, IOException {
     for (int i=0;i< zombieClients.size();i++) {
       Socket zombie = zombieClients.get(i);
@@ -397,6 +444,11 @@ public class SnarlServer {
     }
   }
 
+  /**
+   * Sends updates to the user clients.
+   * @throws IOException if there is an error with the inputs/outputs
+   * @throws JSONException if there is an error with the JSON
+   */
   public void sendPlayerUpdates() throws IOException, JSONException {
     for (int i=0;i<clients.size();i++) {
       Socket client = clients.get(i);
@@ -417,7 +469,12 @@ public class SnarlServer {
   }
 
 
-
+  /**
+   * Reads in the name from the DataInputStream.
+   * @param in represents the DataInputStream
+   * @return the name read from in
+   * @throws Exception if there is an error with the in
+   */
   public String readName(DataInputStream in) throws Exception {
     Character curr = in.readChar();
     StringBuilder valid = new StringBuilder();
@@ -429,6 +486,12 @@ public class SnarlServer {
     return valid.toString();
   }
 
+  /**
+   * Reads the JSON object from in and returns it as a string.
+   * @param in represents the DataInputStream
+   * @return the string from the JSON object
+   * @throws Exception if there is an error with the in or JSON
+   */
   public String readJsonObject(DataInputStream in) throws Exception {
     Character curr = in.readChar();
     StringBuilder valid = new StringBuilder();
@@ -445,6 +508,11 @@ public class SnarlServer {
     throw new Exception("Not a valid string");
   }
 
+  /**
+   * Generates the Leader Board for the entire game.
+   * @return a JSON object representing the Leader Board
+   * @throws JSONException if there is an error with the JSON
+   */
   public JSONObject generateLeaderBoard() throws JSONException{
     HashMap<String, Integer> playerKeyCount = this.gameManager.playerKeyCount;
     HashMap<String, Integer> playerExitCount = this.gameManager.playerExitCount;
@@ -548,6 +616,14 @@ public class SnarlServer {
     return leaderBoard;
   }
 
+  /**
+   * Gets a key given its value in the given Map.
+   * @param map represents a Map
+   * @param value represents the value of the desired key
+   * @param <T> represents the key parameter
+   * @param <E> represents the value parameter
+   * @return the key of the given value
+   */
   public static <T, E> Set<T> getKeysByValue(Map<T, E> map, E value) {
     Set<T> keys = new HashSet<T>();
     for (Map.Entry<T, E> entry : map.entrySet()) {
@@ -559,7 +635,12 @@ public class SnarlServer {
   }
 
 
-
+  /**
+   * This is the main method for the Server that runs the entire game.
+   * @param args the given string arguments
+   * @throws IOException if there is an error with the inputs/outputs
+   * @throws JSONException if there is an error with the JSON
+   */
   public static void main(String[] args) throws IOException, JSONException {
     String fileName = "snarl.levels";
     int clientMax = 4;
@@ -597,9 +678,9 @@ public class SnarlServer {
   }
 
   /**
-   *
-   * @return
-   * @throws JSONException
+   * Generates a JSON object representing the welcome message.
+   * @return a JSON object representing the welcome message.
+   * @throws JSONException if there is an error with the JSON
    */
   public JSONObject generateServerWelcome() throws JSONException {
     JSONObject info = new JSONObject();

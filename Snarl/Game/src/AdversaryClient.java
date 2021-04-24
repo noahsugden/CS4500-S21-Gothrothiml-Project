@@ -7,6 +7,10 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 
+/**
+ * This class represents the AdversaryClient.  It is an abstract class that is extended by the other
+ * adversary client classes.
+ */
 public abstract class AdversaryClient {
 
     Socket client;
@@ -16,12 +20,21 @@ public abstract class AdversaryClient {
     String name = "Zombie";
     ArrayList<Level> levels = new ArrayList<>();
 
+    /**
+     * Default constructor.
+     * @param address a string representing the address
+     * @param port an int representing the port
+     */
     public AdversaryClient(String address, int port) {
-
     }
 
 
-
+    /**
+     * Turns the given string into a JSON object and returns its type as a string.
+     * @param json a string representing a JSON
+     * @return a string representing the type of the JSON object
+     * @throws JSONException if there is an issue with the JSON
+     */
     public String determineJsonObject(String json) throws JSONException {
         JSONObject object = new JSONObject(json);
         return object.getString("type");
@@ -39,6 +52,11 @@ public abstract class AdversaryClient {
         }
     }
 
+    /**
+     * Adds all of the levels to the levels ArrayList.
+     * @param json a string representing a JSON
+     * @throws JSONException if there is an issue with the JSON
+     */
     public void generateLevel(String json) throws JSONException {
         JSONObject object = new JSONObject(json);
         JSONArray levelArray  = object.getJSONArray("levels");
@@ -51,7 +69,12 @@ public abstract class AdversaryClient {
     }
 
 
-
+    /**
+     * Generates a Level given the level JSON object.
+     * @param level a JSON object representing the level
+     * @return the generated Level
+     * @throws JSONException if there is an issue with the JSON
+     */
     public Level getLevel(JSONObject level) throws JSONException{
         ArrayList<Room> roomList = new ArrayList<>();
         ArrayList<Hallway> hallwayList = new ArrayList<>();
@@ -97,6 +120,12 @@ public abstract class AdversaryClient {
         return l;
     }
 
+    /**
+     * Generates a Room given the room JSON object
+     * @param room a JSON object representing the room
+     * @return the generated Room
+     * @throws JSONException if there is an issue with the JSON
+     */
     public Room readRoomObject(JSONObject room) throws JSONException {
         ArrayList<Position> nonWallTiles = new ArrayList<>();
         ArrayList<Position> doors = new ArrayList<>();
@@ -126,6 +155,12 @@ public abstract class AdversaryClient {
         return jsonRoom;
     }
 
+    /**
+     * Generates a Hallway given the hallway JSON object
+     * @param hallway a JSON object representing the hallway
+     * @return the generated Hallway
+     * @throws JSONException if there is an issue with the JSON
+     */
     public  Hallway readHallwayObject(JSONObject hallway) throws JSONException {
         JSONArray from = hallway.getJSONArray("from");
         JSONArray to = hallway.getJSONArray("to");
@@ -144,6 +179,12 @@ public abstract class AdversaryClient {
         return result;
     }
 
+    /**
+     * Generates the 2D level layout given the layout JSON array.
+     * @param layout a JSON array representing the level layout
+     * @return a 2D array of the level layout
+     * @throws JSONException if there is an issue with the JSON
+     */
     public int[][] generateLayout(JSONArray layout) throws JSONException {
         int x = layout.length();
         int max = 0;
@@ -176,6 +217,10 @@ public abstract class AdversaryClient {
     }
 
 
+    /**
+     * Prints the given ascii 2D array
+     * @param ascii a 2D int array
+     */
     public void printAscii(int[][] ascii) {
         for (int[] x : ascii)
         {
@@ -216,6 +261,12 @@ public abstract class AdversaryClient {
     }
 
 
+    /**
+     * Reads the JSON object from in and returns the valid string.
+     * @param in represents the DataInputStream
+     * @return the valid string
+     * @throws Exception if the string is not valid
+     */
     public String readJsonObject(DataInputStream in) throws Exception {
         Character curr = in.readChar();
 
